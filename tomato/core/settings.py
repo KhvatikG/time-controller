@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     BASE_API_URL: str = "http://smartomato.ru/api"
 
-    AUTHORIZED_USERS: set = {1788982392}
+    AUTHORIZED_USERS: set = {1788982392, 930239035}
 
     # id телеграм чатов
     #KRUG_CHAT_ID: int

@@ -1,0 +1,18 @@
+
+version: '3.8'
+
+services:
+  bot:
+    image: time-controller-image
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      - TOMATO_LOGIN=${TOMATO_LOGIN}
+      - TOMATO_PASSWORD=${TOMATO_PASSWORD}
+      - BOT_TOKEN=${BOT_TOKEN}
+      - KRUG_ORGANIZATION_ID=${KRUG_ORGANIZATION_ID}
+    volumes:
+      - .:/app
+    command: poetry run python main.py
