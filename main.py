@@ -82,7 +82,6 @@ async def echo_handler(message: Message) -> None:
     """
     organization_id = get_organization_id(message.message_thread_id)
     if organization_id is None:
-        await message.answer("Не удалось определить заведение.")
         return
 
     try:
