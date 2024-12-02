@@ -27,14 +27,24 @@ logger.add("main.log")
 load_dotenv()
 BOT_TOKEN = getenv("BOT_TOKEN")
 
-KRUG = 2
-KULT = 3
-GONZO = 4
-
-CHAT_ID_TO_ORGANIZATION_ID = {KRUG: 44166}
-
 
 def get_organization_id(message_thread_id):
+    """
+    Возвращает идентификатор организации по номеру чата.
+    :param message_thread_id: id чата
+    :return:
+    """
+
+    KRUG = 2
+    KULT = 3
+    GONZO = 4
+
+    CHAT_ID_TO_ORGANIZATION_ID = {
+        KRUG: 44166,
+        KULT: 45128,
+        GONZO: 45622
+    }
+
     if message_thread_id in CHAT_ID_TO_ORGANIZATION_ID:
         return CHAT_ID_TO_ORGANIZATION_ID[message_thread_id]
     else:
@@ -80,8 +90,14 @@ async def echo_handler(message: Message) -> None:
     """
 
     """
-    organization_id = get_organization_id(message.message_thread_id)
-    if organization_id is None:
+    try:
+        organization_id = get_organization_id(message.message_thread_id)
+        if organization_id is None:
+            return
+    except Exception as e:
+        error_message = f"Что-то пошло не так! Ошибка: \n❗{html.bold("ОШИБКА:")}❗\n {e}"
+        await message.answer(error_message)
+        logger.error(error_message)
         return
 
     try:
@@ -93,7 +109,9 @@ async def echo_handler(message: Message) -> None:
     except Exception as e:
         logger.error(e)
         # But not all the types is supported to be copied so need to handle it
-        await message.answer(f"Что-то пошло не так, пришли время в минутах в числовом виде!\n{e}")
+        # TODO: Стилизовать сообщение используя HTML разметку iogram и смайлы
+        await message.answer(f"Что-то пошло не так, пришли время в минутах в числовом виде!\n"
+                             f"❗{html.bold("ОШИБКА:")}❗\n {e}")
 
 
 async def main() -> None:
