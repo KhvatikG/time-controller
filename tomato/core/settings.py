@@ -7,6 +7,8 @@ load_dotenv()  # Загружаем переменные среды из .env
 
 class Settings(BaseSettings):
 
+    BOT_TOKEN: str
+
     TOMATO_LOGIN: str
     TOMATO_PASSWORD: str
 

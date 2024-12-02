@@ -2,7 +2,6 @@
 # TODO: И ее дельту относительно Азова
 from functools import wraps
 
-# TODO: Упаковать получение актуального времени в функцию для дальнейшего переиспользования
 # TODO: Добавить скедулер который с настраиваемым менеджером промежутком будет уточнять
 # TODO: Актуально ли сейчас время ожидания + инфу о времени и присылать клавиатуру(ДА/Нет)
 # TODO: Если Да то ок, если нет то - Укажите актуальное время
@@ -23,9 +22,6 @@ from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
 
 logger.add("main.log")
-
-load_dotenv()
-BOT_TOKEN = getenv("BOT_TOKEN")
 
 
 def get_organization_id(message_thread_id):
@@ -109,14 +105,13 @@ async def echo_handler(message: Message) -> None:
     except Exception as e:
         logger.error(e)
         # But not all the types is supported to be copied so need to handle it
-        # TODO: Стилизовать сообщение используя HTML разметку iogram и смайлы
         await message.answer(f"Что-то пошло не так, пришли время в минутах в числовом виде!\n"
                              f"❗{html.bold("ОШИБКА:")}❗\n {e}")
 
 
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
-    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    bot = Bot(token=SETTINGS.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
     # And the run events dispatching
     await dp.start_polling(bot)
