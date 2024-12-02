@@ -24,19 +24,36 @@ class Settings(BaseSettings):
     KRUG_ORGANIZATION_ID: int = 44166
     GONZO_ORGANIZATION_ID: int = 0
 
-    # Дельты для вычисления времени ожидания зон ############################################################
+    # id зон
     KRUG_AZOV_ID: int = 37894
     KRUG_YASNY_SOLNECHNY_ID: int = 54142
     KRUG_KULESHOVKA_ID: int = 39832
     KRUG_NOVOALEXANDROVKA_ID: int = 39830
 
+    KULT_AZOV_ID: int = 45398
+    KULT_YASNY_SOLNECHNY_ID: int = 54164
+
+    GONZO_AZOV_ID: int = 49937
+    GONZO_YASNY_SOLNECHNY_ID: int = 54148
+
+    # Дельты
     DELTAS: dict = {
         KRUG_AZOV_ID: 0,
         KRUG_YASNY_SOLNECHNY_ID: 0,
         KRUG_NOVOALEXANDROVKA_ID: 20,
         KRUG_KULESHOVKA_ID: 25,
+
+        KULT_AZOV_ID: 0,
+        KULT_YASNY_SOLNECHNY_ID: 0,
+
+        GONZO_AZOV_ID: 0,
+        GONZO_YASNY_SOLNECHNY_ID: 0,
     }
-    ##########################################################################################################
+
+    # Дефолтные значения времени
+    DEFAULT_ZONES_TIMES: dict = {
+        "AZOV_ALL_ORGANIZATIONS": 40
+    }
 
     def get_department_id_by_chat_id(self, chat_id: int):
         if chat_id == self.KRUG_CHAT_ID:
