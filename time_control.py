@@ -7,7 +7,7 @@
 
 # TODO: Вынести baseurl в конфиг
 
-# Вынести api методы в smartomato_api
+# TODO: Вынести api методы в smartomato_api
 
 from aiogram import html
 import requests
@@ -18,7 +18,7 @@ from loguru import logger
 from models.zone import Zone
 from tomato.core.settings import SETTINGS
 
-logger.add("logs/time_control.log")
+logger.add("log/time_control.log")
 
 
 def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone]:
@@ -51,16 +51,16 @@ def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone
                         zones_list.append(zone_instance)
 
                 except Exception as e:
-                    logger.error(f"Не удалось создать экземпляр зоны {zone}")
+                    logger.exception(f"Не удалось создать экземпляр зоны {zone}")
                     raise e
         else:
             error = f"Некорректный ответ от сервера смартомато: \n{request_data}"
-            logger.error(error)
+            logger.exception(error)
             raise Exception(error)
 
     else:
         error = f"Не удалось получить список зон {response.status_code=}\n{response.text}"
-        logger.error(error)
+        logger.exception(error)
         raise Exception(error)
 
     return zones_list
@@ -90,7 +90,7 @@ def update_zone(zone: Zone, token):
         logger.info(f"Зона {zone.name} изменена")
         return True
     else:
-        logger.error(f"Не удалось изменить зону {zone.name}\n  {code=}\n  {text}")
+        logger.exception(f"Не удалось изменить зону {zone.name}\n  {code=}\n  {text}")
         raise Exception(f"Ошибка: \n{code=}\n{text}")
 
 
@@ -114,7 +114,7 @@ def set_waiting_time(organization_id: int, waiting_time: int, token: str) -> Non
                     err = (f"Вы указали слишком маленькое общее время, оно должно быть больше времени транспортировки.\
                          \nТекущее время транспортировки зоны {zone.name}: {zone.transportation_time}\n"
                            f" Вы указали: {waiting_time}")
-                    logger.error(err)
+                    logger.exception(err)
                     raise Exception(err)
 
                 zone.delivery_time = waiting_time + zone_delta
@@ -122,12 +122,12 @@ def set_waiting_time(organization_id: int, waiting_time: int, token: str) -> Non
                 try:
                     update_zone(zone=zone, token=token)
                 except Exception as e:
-                    logger.error(f"Ошибка при обновлении зоны {zone.name}: {e}")
+                    logger.exception(f"Ошибка при обновлении зоны {zone.name}: {e}")
                     raise Exception(f"Ошибка при обновлении зоны {zone.name}: {e}")
 
         except Exception as e:
             err = f"Непредвиденная ошибка в set_waiting_time {e}"
-            logger.error(err)
+            logger.exception(err)
             raise Exception(err)
 
 
@@ -141,7 +141,7 @@ def get_current_waiting_time_string(organization_id: int, token: str) -> str:
     try:
         zones = get_all_zones_of_organization(organization_id=organization_id, token=token)
     except Exception as e:
-        logger.error(f"Ошибка при получении зон: {e}")
+        logger.exception(f"Ошибка при получении зон: {e}")
         raise Exception(f"Ошибка при получении зон: {e}")
     else:
         logger.info(f"Получены зоны: {zones}")
@@ -152,5 +152,5 @@ def get_current_waiting_time_string(organization_id: int, token: str) -> str:
             return waiting_times_string
         except Exception as e:
             err = f"Непредвиденная ошибка в get_current_waiting_time {e}"
-            logger.error(err)
+            logger.exception(err)
             raise Exception(err)
