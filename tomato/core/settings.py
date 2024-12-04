@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     BASE_API_URL: str = "http://smartomato.ru/api"
 
-    AUTHORIZED_USERS: set = {1788982392, 930239035}
+    AUTHORIZED_USERS: set = {1788982392, 930239035, 836353080}
 
     # id зон
     KRUG_AZOV_ID: int = 37894
