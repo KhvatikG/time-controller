@@ -1,12 +1,3 @@
-# TODO: Добавить таблицу пользователей с ролями юзеры и менеджеры,
-#  и оповещать в боте менеджеров об изменениях
-
-# TODO: Добавить организации с их id для получения зон и названиями для кнопок в БД
-
-# TODO: Создать 2 клавиатуры: Для выбора организаций, и с 2-мя кнопками(выбрана организация N, назад к выбору)
-
-# TODO: Вынести baseurl в конфиг
-
 # TODO: Вынести api методы в smartomato_api
 
 from aiogram import html
@@ -17,8 +8,6 @@ from loguru import logger
 
 from models.zone import Zone
 from tomato.core.settings import SETTINGS
-
-logger.add("log/time_control.log")
 
 
 def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone]:
@@ -35,14 +24,14 @@ def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone
     response = requests.get(url, params=payload)
     code = response.status_code
 
-    logger.info(f"Получение всех зон статус - {code}")
+    logger.info(f"\nПолучение всех зон для {organization_id=}, статус ответа - {code}")
 
     zones_list: list[Zone] = []
 
     if code == 200:
         request_data = json.loads(response.text)
         if zones := request_data.get("delivery_zones"):
-            logger.info("Получены зоны:")
+            logger.info("Зоны получены - delivery_zones в ответе сервера не пуст")
             for zone in zones:
                 try:
                     logger.info(f'Получаем инстанс зоны {zone.get("name")}')
@@ -50,9 +39,9 @@ def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone
                     if zone_instance.name != "Пункт самовывоза":
                         zones_list.append(zone_instance)
 
-                except Exception as e:
+                except Exception:
                     logger.exception(f"Не удалось создать экземпляр зоны {zone}")
-                    raise e
+                    raise
         else:
             error = f"Некорректный ответ от сервера смартомато: \n{request_data}"
             logger.exception(error)
@@ -82,9 +71,6 @@ def update_zone(zone: Zone, token):
 
     code = response.status_code
     text = response.text
-
-    logger.info(f"Код ответа - {code} \n  Ответ {text}")
-    logger.info(f"{response=}")
 
     if code == 204:
         logger.info(f"Зона {zone.name} изменена")

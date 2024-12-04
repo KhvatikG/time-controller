@@ -8,8 +8,6 @@ from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
 
 
-logger.add('log/set_default_time.log', rotation='10 MB', encoding='utf-8')
-
 async def set_default_time() -> None:
     """Устанавливает время ожидания по умолчанию для всех организаций."""
 

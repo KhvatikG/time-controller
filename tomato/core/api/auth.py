@@ -1,9 +1,9 @@
 import requests
 
-from tomato.core.settings import SETTINGS
 from loguru import logger
 
-logger.add('log/auth.log', rotation='10 MB', encoding='utf-8')
+from tomato.core.settings import SETTINGS
+
 
 def get_tomato_auth_token() -> str:
     """Принимает логин и пароль от томата и возвращает токен, в случае
@@ -31,6 +31,7 @@ def get_tomato_auth_token() -> str:
     if code == 200:
         try:
             token = data['meta']['token']
+            logger.info(f"Токен успешно получен")
             return token
 
         except Exception as e:

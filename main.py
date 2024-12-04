@@ -1,5 +1,3 @@
-# TODO: Добавить к каждой зоне в БД ее дефолтное время, для сброса после смены
-# TODO: И ее дельту относительно Азова
 # TODO: Добавить скедулер который с настраиваемым менеджером промежутком будет уточнять
 # TODO: Актуально ли сейчас время ожидания + инфу о времени и присылать клавиатуру(ДА/Нет)
 # TODO: Если Да то ок, если нет то - Укажите актуальное время
@@ -16,9 +14,10 @@ from time_control import set_waiting_time, get_current_waiting_time_string
 from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
 from bot_init import bot
+from tomato.core.logger_settings import logger_setup
 
 
-logger.add("log/main.log", rotation="10 MB")
+logger_setup()
 
 
 class LoggingMiddleware(BaseMiddleware):
