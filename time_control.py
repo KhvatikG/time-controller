@@ -147,7 +147,7 @@ def get_current_waiting_time_string(organization_id: int, token: str) -> str:
         logger.info(f"Получены зоны: {zones}")
         try:
             waiting_times_string = "\n".join(f"{html.bold(zone.name)}:\n -Готовка: {zone.cooking_time} минут\n"
-                                             f" -Транспортировки: {zone.transportation_time} минут \n"
+                                             f" -Транспортировка: {zone.transportation_time} минут \n"
                                              f" -Общее: {zone.delivery_time} минут\n" for zone in zones)
             return waiting_times_string
         except Exception as e:
