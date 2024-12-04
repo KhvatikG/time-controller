@@ -7,6 +7,8 @@ load_dotenv()  # Загружаем переменные среды из .env
 
 class Settings(BaseSettings):
 
+    MAIN_CHAT_ID: int = -1002351370021
+
     BOT_TOKEN: str
 
     TOMATO_LOGIN: str
@@ -15,16 +17,6 @@ class Settings(BaseSettings):
     BASE_API_URL: str = "http://smartomato.ru/api"
 
     AUTHORIZED_USERS: set = {1788982392, 930239035}
-
-    # id телеграм чатов
-    #KRUG_CHAT_ID: int
-    #KULT_CHAT_ID: int
-    #GONZO_CHAT_ID: int
-
-    # id отделов
-    KULT_ORGANIZATION_ID: int = 0
-    KRUG_ORGANIZATION_ID: int = 44166
-    GONZO_ORGANIZATION_ID: int = 0
 
     # id зон
     KRUG_AZOV_ID: int = 37894
@@ -57,16 +49,26 @@ class Settings(BaseSettings):
         "AZOV_ALL_ORGANIZATIONS": 40
     }
 
-    def get_department_id_by_chat_id(self, chat_id: int):
-        if chat_id == self.KRUG_CHAT_ID:
-            return self.KRUG_ORGANIZATION_ID
+    # thread_id - id треда в группе
+    KRUG: int = 2
+    KULT: int = 3
+    GONZO: int = 4
+    # Сопоставление thread_id с id организации в смартомато
+    CHAT_ID_TO_ORGANIZATION_ID: dict = {
+        KRUG: 44166,
+        KULT: 45128,
+        GONZO: 45622
+    }
 
-        elif chat_id == self.KULT_CHAT_ID:
-            return self.KULT_ORGANIZATION_ID
+    def get_organization_id(self, message_thread_id):
+        """
+        Возвращает идентификатор организации по номеру чата.
+        :param message_thread_id: id чата
+        :return:
+        """
 
-        elif chat_id == self.GONZO_CHAT_ID:
-            return self.GONZO_ORGANIZATION_ID
-
+        if message_thread_id in self.CHAT_ID_TO_ORGANIZATION_ID:
+            return self.CHAT_ID_TO_ORGANIZATION_ID[message_thread_id]
         else:
             return None
 
