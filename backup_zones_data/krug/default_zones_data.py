@@ -1,5 +1,3 @@
-# TODO: перевести на pydantic
-
 null = "null"
 true = "true"
 false = "false"
