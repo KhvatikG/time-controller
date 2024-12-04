@@ -1,0 +1,2 @@
+
+0 0 * * * root poetry run python /app/set_default_time.py
