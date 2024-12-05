@@ -13,6 +13,7 @@ pydantic-settings = "^2.6.0"
 aiogram = "^3.13.1"
 loguru = "^0.7.2"
 apscheduler = "^3.11.0"
+pytz = "^2024.2"
 
 
 [build-system]

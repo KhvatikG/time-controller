@@ -1,7 +1,3 @@
-# TODO: Добавить скедулер который с настраиваемым менеджером промежутком будет уточнять
-# TODO: Актуально ли сейчас время ожидания + инфу о времени и присылать клавиатуру(ДА/Нет)
-# TODO: Если Да то ок, если нет то - Укажите актуальное время
-
 from functools import wraps
 import asyncio
 
@@ -12,6 +8,7 @@ from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
+from pytz import timezone
 
 from reminder import reminder_router, reminder
 from set_default_time import set_default_time
@@ -89,13 +86,13 @@ async def echo_handler(message: Message) -> None:
 
 async def main() -> None:
     # Инициализация скедулера
-    scheduler = AsyncIOScheduler()
+    scheduler = AsyncIOScheduler(timezone=timezone('Europe/Moscow'))
     # Добавление в скедулер сброса времени на дефолт по расписанию
-    default_time_trigger = CronTrigger(hour=22, minute=30)
+    default_time_trigger = CronTrigger(hour=22, minute=30, timezone=timezone('Europe/Moscow'))
     scheduler.add_job(set_default_time, trigger=default_time_trigger)
 
     # Добавление в скедулер напоминания о поддержании времени в актуальном состоянии
-    reminder_trigger = IntervalTrigger(hours=1)
+    reminder_trigger = IntervalTrigger(hours=2)
     scheduler.add_job(reminder, trigger=reminder_trigger)
 
     scheduler.start()
