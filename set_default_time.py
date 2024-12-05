@@ -21,7 +21,7 @@ async def set_default_time() -> None:
         return
 
     try:
-        # Получаем дефолтное время для зоны Азов во всех организациях(сейчас оно одинаковое
+        # Получаем дефолтное время для зоны Азов во всех организациях(сейчас оно одинаковое)
         default_time = SETTINGS.DEFAULT_ZONES_TIMES["AZOV_ALL_ORGANIZATIONS"]
         # Перебираем id тредов и id организаций
         for thread_id, organization_id in SETTINGS.CHAT_ID_TO_ORGANIZATION_ID.items():
