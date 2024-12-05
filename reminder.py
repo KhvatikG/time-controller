@@ -3,7 +3,7 @@ from datetime import datetime
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from loguru import logger
-from aiogram import Router
+from aiogram import Router, html
 
 from bot_init import bot
 from time_control import get_current_waiting_time_string
@@ -20,6 +20,7 @@ def get_keyboard():
         [InlineKeyboardButton(text="НЕТ", callback_data='reminder_no')]
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
+
 
 async def reminder():
     # Если сейчас заведения закрыты
@@ -75,9 +76,19 @@ async def reminder():
 async def reminder_callback(call: CallbackQuery):
     if call.data == 'reminder_yes':
         await bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="🔥")
+        await bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text=f"Время ожидания установлено верно.\n -{html.italic(call.from_user.full_name)}"
+        )
     elif call.data == 'reminder_no':
         await bot.answer_callback_query(
             callback_query_id=call.id,
             show_alert=False,
             text="Пожалуйста введите корректное время ожидания."
+        )
+        await bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text=f"Пожалуйста введите корректное время ожидания."
         )
