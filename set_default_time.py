@@ -10,7 +10,7 @@ from tomato.core.settings import SETTINGS
 
 async def set_default_time() -> None:
     """Устанавливает время ожидания по умолчанию для всех организаций."""
-
+    logger.info('Установка дефолтного времени...')
     try:
         token = get_tomato_auth_token()
     except Exception as e:
@@ -35,6 +35,7 @@ async def set_default_time() -> None:
             await bot.send_message(
                 chat_id=SETTINGS.MAIN_CHAT_ID, text=time_string, message_thread_id=thread_id
             )
+            logger.info("Дефолтное время установлено\n")
     except Exception as e:
         err = f'Ошибка при установке дефолтного времени: {e}'
         logger.exception(err)
