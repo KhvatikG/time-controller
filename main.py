@@ -95,8 +95,10 @@ async def main() -> None:
     scheduler.add_job(set_default_time, trigger=default_time_trigger)
 
     # Добавление в скедулер напоминания о поддержании времени в актуальном состоянии
-    reminder_triger = IntervalTrigger(hours=2)
-    scheduler.add_job(reminder, trigger=reminder_triger)
+    reminder_trigger = IntervalTrigger(hours=2)
+    scheduler.add_job(reminder, trigger=reminder_trigger)
+
+    scheduler.start()
 
     await dp.start_polling(bot)
 
