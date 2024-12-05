@@ -17,5 +17,6 @@ class BotSingleton:
     def get_bot(self):
         return self.bot
 
+
 bot_singleton = BotSingleton()
 bot = bot_singleton.get_bot()

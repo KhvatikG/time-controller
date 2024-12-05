@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     KRUG: int = 2
     KULT: int = 3
     GONZO: int = 4
+    # Список всех тредов
+    THREAD_ID_LIST: list = [KRUG, KULT, GONZO]
+
     # Сопоставление thread_id с id организации в смартомато
     CHAT_ID_TO_ORGANIZATION_ID: dict = {
         KRUG: 44166,

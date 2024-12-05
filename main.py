@@ -9,7 +9,12 @@ from aiogram import Dispatcher, html, types, BaseMiddleware
 from aiogram.filters import CommandStart
 from aiogram.types import Message, Update
 from loguru import logger
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 
+from reminder import reminder_router, reminder
+from set_default_time import set_default_time
 from time_control import set_waiting_time, get_current_waiting_time_string
 from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
@@ -39,7 +44,7 @@ def authorized_only(handler):
 
 dp = Dispatcher()
 dp.update.middleware(LoggingMiddleware())
-
+dp.include_router(reminder_router)
 
 @dp.message(CommandStart())
 @authorized_only
@@ -83,8 +88,17 @@ async def echo_handler(message: Message) -> None:
 
 
 async def main() -> None:
-    await dp.start_polling(bot)
+    # Инициализация скедулера
+    scheduler = AsyncIOScheduler()
+    # Добавление в скедулер сброса времени на дефолт по расписанию
+    default_time_trigger = CronTrigger(hour=22, minute=30)
+    scheduler.add_job(set_default_time, trigger=default_time_trigger)
 
+    # Добавление в скедулер напоминания о поддержании времени в актуальном состоянии
+    reminder_triger = IntervalTrigger(hours=2)
+    scheduler.add_job(reminder, trigger=reminder_triger)
+
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
