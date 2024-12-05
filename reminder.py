@@ -1,4 +1,5 @@
 # TODO: Возможно стоит добавить логику оповещения старшего ответственного в случае если нет ответа
+from datetime import datetime
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from loguru import logger
@@ -21,6 +22,10 @@ def get_keyboard():
 
 
 async def reminder():
+
+    # Если сейчас заведения закрыты
+    if not (SETTINGS.TIME_OPEN <= datetime.now().hour <= SETTINGS.TIME_CLOSE):
+        return
 
     try:
         token = get_tomato_auth_token()

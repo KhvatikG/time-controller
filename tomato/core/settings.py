@@ -16,6 +16,10 @@ class Settings(BaseSettings):
 
     BASE_API_URL: str = "http://smartomato.ru/api"
 
+    # Режим работы заведений
+    TIME_OPEN: int = 10
+    TIME_CLOSE: int = 22
+
     AUTHORIZED_USERS: set = {1788982392, 930239035, 836353080}
 
     # id зон
