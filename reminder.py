@@ -12,6 +12,7 @@ from tomato.core.api.auth import get_tomato_auth_token
 
 reminder_router = Router(name=__name__)
 
+
 def get_keyboard():
     """Возвращает клавиатуру с вариантами ответа"""
     inline_kb_list = [
@@ -20,9 +21,7 @@ def get_keyboard():
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
-
 async def reminder():
-
     # Если сейчас заведения закрыты
     if not (SETTINGS.TIME_OPEN <= datetime.now().hour <= SETTINGS.TIME_CLOSE):
         return
@@ -67,16 +66,18 @@ async def reminder():
         await bot.send_message(
             SETTINGS.MAIN_CHAT_ID,
             "Верно ли установлено время ожидания?",
+            message_thread_id=thread_id,
             reply_markup=get_keyboard()
         )
+
 
 @reminder_router.callback_query()
 async def reminder_callback(call: CallbackQuery):
     if call.data == 'reminder_yes':
-        await bot.answer_callback_query("🔥")
+        await bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="🔥")
     elif call.data == 'reminder_no':
-        await bot.send_message(
-            SETTINGS.MAIN_CHAT_ID,
-            "Пожалуйста введите корректное время ожидания.",
-            message_thread_id=call.message.message_thread_id
+        await bot.answer_callback_query(
+            callback_query_id=call.id,
+            show_alert=False,
+            text="Пожалуйста введите корректное время ожидания."
         )
