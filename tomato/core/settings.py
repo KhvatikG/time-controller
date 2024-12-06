@@ -1,6 +1,10 @@
+import os
+
 from dotenv import load_dotenv
 
 from pydantic_settings import BaseSettings
+
+from root_path import ROOT_DIR
 
 load_dotenv()  # Загружаем переменные среды из .env
 
@@ -15,6 +19,7 @@ class Settings(BaseSettings):
     TOMATO_PASSWORD: str
 
     BASE_API_URL: str = "http://smartomato.ru/api"
+    DB_URI: str = 'sqlite+aiosqlite:///' + os.path.join(ROOT_DIR, 'db/db.sqlite3')
 
     # Режим работы заведений
     TIME_OPEN: int = 10
