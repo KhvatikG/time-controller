@@ -4,8 +4,11 @@ from datetime import datetime
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from loguru import logger
 from aiogram import Router, html
+from sqlalchemy import select
 
 from bot_init import bot
+from db.models.user import User
+from db.session import get_session
 from time_control import get_current_waiting_time_string
 from tomato.core.settings import SETTINGS
 from tomato.core.api.auth import get_tomato_auth_token
@@ -76,10 +79,13 @@ async def reminder():
 async def reminder_callback(call: CallbackQuery):
     if call.data == 'reminder_yes':
         await bot.answer_callback_query(callback_query_id=call.id, show_alert=False, text="🔥")
+        async with get_session() as session:
+            result = await session.execute(select(User).where(User.id == call.from_user.id))
+            user = result.scalars().one_or_none()
         await bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text=f"Время ожидания установлено верно.\n -{html.italic(call.from_user.full_name)}"
+            text=f"Время ожидания установлено верно.\n -{html.italic(user.name)}"
         )
     elif call.data == 'reminder_no':
         await bot.answer_callback_query(
