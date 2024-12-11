@@ -16,7 +16,7 @@ from db.models.base import Base
 from db.session import engine
 from reminder import reminder_router, reminder
 from set_default_time import set_default_time
-from time_control import set_waiting_time, get_current_waiting_time_string
+from tomato.time_control import set_waiting_time, get_current_waiting_time_string
 from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
 from bot_init import bot

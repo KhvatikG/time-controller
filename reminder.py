@@ -9,7 +9,7 @@ from sqlalchemy import select
 from bot_init import bot
 from db.models.user import User
 from db.session import get_session
-from time_control import get_current_waiting_time_string
+from tomato.time_control import get_current_waiting_time_string
 from tomato.core.settings import SETTINGS
 from tomato.core.api.auth import get_tomato_auth_token
 

@@ -3,7 +3,7 @@ import asyncio
 from loguru import logger
 
 from bot_init import bot
-from time_control import set_waiting_time, get_current_waiting_time_string
+from tomato.time_control import set_waiting_time, get_current_waiting_time_string
 from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
 
