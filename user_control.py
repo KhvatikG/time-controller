@@ -4,6 +4,7 @@ from sqlalchemy import select
 
 from db.models.user import User
 from db.session import get_session
+from tomato.core.settings import SETTINGS
 
 user_control_router = Router()
 
@@ -25,7 +26,7 @@ def parse_user(userdata: str) -> dict:
 @user_control_router.message(F.text.startswith('adduser'))
 async def add_user(message: Message):
     """"Перехватчик добавления нового пользователя"""
-    if message.from_user.id != 1788982392:
+    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
         await message.answer('У вас нет прав на выполнение данной команды')
         return
     try:
@@ -52,7 +53,7 @@ async def add_user(message: Message):
 @user_control_router.message(F.text == 'getusers')
 async def get_users(message: Message):
     """Перехватчик получения списка пользователей"""
-    if message.from_user.id != 1788982392:
+    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
         await message.answer('У вас нет прав на выполнение данной команды')
         return
     try:

@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     TIME_OPEN: int = 10
     TIME_CLOSE: int = 22
 
+    SUPER_ADMIN_ID: int = 1788982392
+
     AUTHORIZED_USERS: set = {1788982392, 930239035, 836353080}
 
     # id зон
