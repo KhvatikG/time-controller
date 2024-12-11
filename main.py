@@ -2,7 +2,7 @@
 from functools import wraps
 import asyncio
 
-from aiogram import Dispatcher, html, types, BaseMiddleware, F
+from aiogram import Dispatcher, html, types, BaseMiddleware
 from aiogram.filters import CommandStart, Filter
 from aiogram.types import Message, Update
 from loguru import logger
@@ -12,6 +12,7 @@ from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
 from sqlalchemy import select
 
+from broadcast import broadcast_router
 from db.models.base import Base
 from db.session import engine
 from reminder import reminder_router, reminder
@@ -73,7 +74,8 @@ dp = Dispatcher()
 dp.update.middleware(LoggingMiddleware())
 dp.include_routers(
     reminder_router,
-    user_control_router
+    user_control_router,
+    broadcast_router,
 )
 
 
