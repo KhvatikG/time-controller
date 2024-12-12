@@ -2,6 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 from pydantic.color import Color
+from pydantic.dataclasses import dataclass
 
 
 class Timetable(BaseModel):
@@ -59,3 +60,54 @@ class Zone(BaseModel):
         use_enum_values = True
         str_strip_whitespace = True
         from_attributes = True
+
+
+class ZonesList:
+    """
+    Структура для хранения и работы со списком зон.
+    Позволяет получать отдельно зону самовывоза, или все остальные зоны.
+    """
+    def __init__(self, zones: List[Zone]):
+        self.self_delivery_zone: Zone | None = None
+        self.delivery_zones: list[Zone] = []
+        self.zones: list[Zone] = zones
+
+        for zone in zones:
+            if zone.name == "Пункт самовывоза":
+                self.self_delivery_zone = zone
+            else:
+                self.delivery_zones.append(zone)
+
+    def __len__(self) -> int:
+        return len(self.zones)
+
+    def __getitem__(self, item) -> Zone:
+        return self.zones[item]
+
+    def __contains__(self, item) -> bool:
+        return item in self.zones
+
+    def __str__(self) -> str:
+        return str(self.zones)
+
+    def __repr__(self) -> str:
+        return "ZonesList(" + ",".join(f"{zone.name}" for zone in self.zones) + ")"
+
+    def __eq__(self, other) -> bool:
+        return self.zones == other.zones
+
+    def __ne__(self, other) -> bool:
+        return self.zones != other.zones
+
+    def get_self_delivery_zone(self) -> Zone:
+        return self.self_delivery_zone
+
+    def get_delivery_zones(self) -> list[Zone]:
+        return self.delivery_zones
+
+    def append(self, zone: Zone) -> None:
+        self.zones.append(zone)
+        if zone.name == "Пункт самовывоза":
+            self.self_delivery_zone = zone
+        else:
+            self.delivery_zones.append(zone)

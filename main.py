@@ -1,8 +1,7 @@
 # TODO: Вынести сервисы в модуль services, и обдумать архитектуру
-from functools import wraps
 import asyncio
 
-from aiogram import Dispatcher, html, types, BaseMiddleware
+from aiogram import Dispatcher, html, BaseMiddleware
 from aiogram.filters import CommandStart, Filter
 from aiogram.types import Message, Update
 from loguru import logger
@@ -10,8 +9,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
-from sqlalchemy import select
 
+from self_delivery import self_delivery_router
 from broadcast import broadcast_router
 from db.models.base import Base
 from db.session import engine
@@ -34,29 +33,6 @@ class LoggingMiddleware(BaseMiddleware):
         return await handler(event, data)
 
 
-def authorized_only(handler):
-    """
-    Декоратор для проверки авторизации пользователя
-    """
-    @wraps(handler)
-    async def wrapped_handler(message: types.Message, *args, **kwargs):
-        logger.debug(f"Начинаем проверку авторизации...")
-        # Пытаемся получить пользователя из БД
-        async with get_session() as session:
-            result = await session.execute(select(User).where(User.id == message.from_user.id))
-            user = result.scalars().one_or_none()
-
-            logger.debug(f"Пользователь найден в БД: {user}")
-
-        if user:
-            logger.debug(f"Пользователь авторизован: {user}")
-            return await handler(message, *args, **kwargs)
-        else:
-            return await message.reply("У вас нет доступа к этой операции.")
-
-    return wrapped_handler
-
-
 class NumericFilter(Filter):
     """
     Фильтр для проверки, что сообщение содержит только цифры
@@ -74,6 +50,7 @@ dp.include_routers(
     reminder_router,
     user_control_router,
     broadcast_router,
+    self_delivery_router,
 )
 
 
@@ -93,6 +70,8 @@ async def command_start_handler(message: Message) -> None:
 async def echo_handler(message: Message) -> None:
     """
     Хэндлер для перехвата времени в минутах из сообщения, ожидает числа, обрезает пробелы по краям.
+    Устанавливает время ожидания для всех зон кроме самовывоза.
+    Если сообщение не является сообщением в треде чата или тред чата не занесен в конфиг, то ничего не происходит.
     """
     logger.debug(f"Начинаем перехват времени...")
     if message.message_thread_id is None:
@@ -102,7 +81,9 @@ async def echo_handler(message: Message) -> None:
     try:
         organization_id = SETTINGS.get_organization_id(message.message_thread_id)
         if organization_id is None:
+            logger.debug(f"Организация не найдена в конфиге {organization_id=}, {message.message_thread_id=}")
             return
+
     except Exception as e:
         error_message = f"Что-то пошло не так! Ошибка: \n❗{html.bold("ОШИБКА:")}❗\n {e}"
         await message.answer(error_message)

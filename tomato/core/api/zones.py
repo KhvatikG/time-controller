@@ -3,11 +3,11 @@ import json
 import requests
 from loguru import logger
 
-from models.zone import Zone
+from models.zone import Zone, ZonesList
 from tomato.core.settings import SETTINGS
 
 
-def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone]:
+def get_all_zones_of_organization(organization_id: int, token: str) -> ZonesList:
     """
     Возвращает все зоны организации с id organization_id.
 
@@ -21,7 +21,7 @@ def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone
     response = requests.get(url, params=payload)
     code = response.status_code
 
-    logger.info(f"\nПолучение всех зон для {organization_id=}, статус ответа - {code}")
+    logger.info(f"Получение всех зон для {organization_id=}, статус ответа - {code}")
 
     zones_list: list[Zone] = []
 
@@ -32,27 +32,27 @@ def get_all_zones_of_organization(organization_id: int, token: str) -> list[Zone
             for zone in zones:
                 try:
                     logger.info(f'Получаем инстанс зоны {zone.get("name")}')
-                    zone_instance = Zone(**zone)
-                    if zone_instance.name != "Пункт самовывоза":
-                        zones_list.append(zone_instance)
+                    zone_instance: Zone = Zone(**zone)
+
+                    zones_list.append(zone_instance)
 
                 except Exception:
                     logger.exception(f"Не удалось создать экземпляр зоны {zone}")
                     raise
         else:
             error = f"Некорректный ответ от сервера смартомато: \n{request_data}"
-            logger.exception(error)
+            logger.error(error)
             raise Exception(error)
 
     else:
         error = f"Не удалось получить список зон {response.status_code=}\n{response.text}"
-        logger.exception(error)
+        logger.error(error)
         raise Exception(error)
 
-    return zones_list
+    return ZonesList(zones_list)
 
 
-def update_zone(zone: Zone, token):
+def update_zone(zone: Zone, token: str) -> bool:
     """
     :param token: Токен авторизации
     :param zone: Экземпляр зоны с новым временем для отправки
@@ -64,14 +64,19 @@ def update_zone(zone: Zone, token):
         'Content-Type': 'application/json'
     }
     logger.info(f"Начинаю изменение зоны {zone.name}")
-    response = requests.request("PUT", url, headers=headers, data=payload)
 
-    code = response.status_code
-    text = response.text
-
-    if code == 204:
-        logger.info(f"Зона {zone.name} изменена")
-        return True
+    try:
+        response = requests.request("PUT", url, headers=headers, data=payload)
+    except Exception as e:
+        logger.exception(f"Ошибка при изменении зоны {zone.name}")
+        raise e
     else:
-        logger.exception(f"Не удалось изменить зону {zone.name}\n  {code=}\n  {text}")
-        raise Exception(f"Ошибка: \n{code=}\n{text}")
+        code = response.status_code
+        text = response.text
+
+        if code == 204:
+            logger.info(f"Зона {zone.name} изменена")
+            return True
+        else:
+            logger.exception(f"Не удалось изменить зону {zone.name}\n  {code=}\n  {text}")
+            raise Exception(f"Ошибка: \n{code=}\n{text}")
