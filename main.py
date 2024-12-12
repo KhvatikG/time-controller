@@ -30,7 +30,7 @@ logger_setup()
 
 class LoggingMiddleware(BaseMiddleware):
     async def __call__(self, handler, event: Update, data: dict):
-        logger.info(f"---------------------\nEVENT RECEIVED: \n{event!r}\n---------------------")
+        logger.bind(aiogram_event=True).info(f"---------------------EVENT RECEIVED---------------------\n{event!r}\n---------------------")
         return await handler(event, data)
 
 
