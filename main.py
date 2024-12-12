@@ -15,6 +15,7 @@ from sqlalchemy import select
 from broadcast import broadcast_router
 from db.models.base import Base
 from db.session import engine
+from decorators import authorized_only
 from reminder import reminder_router, reminder
 from set_default_time import set_default_time
 from tomato.time_control import set_waiting_time, get_current_waiting_time_string
@@ -23,9 +24,6 @@ from tomato.core.settings import SETTINGS
 from bot_init import bot
 from tomato.core.logger_settings import logger_setup
 from user_control import user_control_router
-
-from db.models.user import User
-from db.session import get_session
 
 logger_setup()
 
