@@ -8,4 +8,4 @@ git checkout stable
 git pull origin stable
 
 # Запуск docker-compose
-docker-compose up -d
+docker-compose up --build -d
