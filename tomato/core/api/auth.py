@@ -19,10 +19,10 @@ def get_tomato_auth_token() -> str:
     payload = {"login": SETTINGS.TOMATO_LOGIN, "password": SETTINGS.TOMATO_PASSWORD}
 
     try:
-        r = requests.post(url, params=payload)
+        r = requests.post(url, json=payload)
     except Exception as e:
         err = f"ОШИБКА АВТОРИЗАЦИИ: {e}"
-        logger.exception(err)
+        logger.error(err)
         raise
 
     code = r.status_code
@@ -36,10 +36,10 @@ def get_tomato_auth_token() -> str:
 
         except Exception as e:
             err = f"ОШИБКА АВТОРИЗАЦИИ: {e}"
-            logger.exception(err)
+            logger.error(err)
             raise
 
     else:
         err = f"ОШИБКА АВТОРИЗАЦИИ {code=}\n{data=}\n"
-        logger.exception(err)
+        logger.error(err)
         raise
