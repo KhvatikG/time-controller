@@ -57,15 +57,18 @@ def set_waiting_time(organization_id: int, waiting_time: int, token: str, for_se
         raise Exception(err) from e
 
 
-def get_current_waiting_time_string(organization_id: int, token: str, for_self_delivery:bool = False) -> str:
+def get_current_waiting_time_string(
+        organization_id: int, token: str, for_self_delivery: bool = False, for_all_zones: bool = False
+) -> str:
     """
     Возвращает текущее время ожидания в зонах отдела с id department_id.
 
+    :param for_all_zones: Если True, то возвращает время ожидания для всех зон организации игнорируя for_self_delivery
     :param for_self_delivery: Если True, то возвращает время ожидания только для самовывоза
     :param organization_id: ID отдела
     :param token: Токен авторизации
     :return: Строку с текущим временем ожидания в минутах для всех зон организации кроме самовывоза,
-     если for_self_delivery == True, иначе только для самовывоза
+     если for_self_delivery == True, то только для самовывоза
     """
     try:
         zones: ZonesList = get_all_zones_of_organization(organization_id=organization_id, token=token)
@@ -75,10 +78,17 @@ def get_current_waiting_time_string(organization_id: int, token: str, for_self_d
 
     logger.info(",".join(f"Получены зоны: {zone.name}" for zone in zones))
     try:
-        if for_self_delivery:  # Если нужно получить время для самовывоза
-
+        if for_all_zones:
+            delivery_zones: list[Zone] = zones.get_delivery_zones()
             self_delivery_zone: Zone = zones.get_self_delivery_zone()
-            waiting_times_string: str = f"{self_delivery_zone.name}: {self_delivery_zone.delivery_time} минут\n"
+            waiting_times_string: str = "\n".join(f"{html.bold(zone.name)}:\n -Готовка: {zone.cooking_time} минут\n"
+                                         f" -Транспортировка: {zone.transportation_time} минут \n"
+                                         f" -Общее: {zone.delivery_time} минут\n" for zone in delivery_zones)
+            waiting_times_string += f"{html.bold(self_delivery_zone.name)}: {self_delivery_zone.delivery_time} минут\n"
+
+        elif for_self_delivery:  # Если нужно получить время для самовывоза
+            self_delivery_zone: Zone = zones.get_self_delivery_zone()
+            waiting_times_string: str = f"{html.bold(self_delivery_zone.name)}: {self_delivery_zone.delivery_time} минут\n"
 
         else:  # Если нужно получить время для всех зон
             delivery_zones: list[Zone] = zones.get_delivery_zones()
