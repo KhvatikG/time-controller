@@ -2,7 +2,6 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 from pydantic.color import Color
-from pydantic.dataclasses import dataclass
 
 
 class Timetable(BaseModel):
@@ -23,13 +22,13 @@ class Zone(BaseModel):
     transportation_time: int
     cooking_time: int
     price: float
-    color: Color | None
+    color: Optional[Color] = None
     timezone: str
     timezone_own: Optional[str] = None
     free_delivery_count: Optional[int] = None
     free_delivery_price: Optional[float] = None
     minimal_order_price: Optional[float] = None
-    area: str | None
+    area: Optional[str] = None
     takeaway: bool = False
     priority: int = 0
     rush_price: Optional[float] = None
@@ -65,12 +64,13 @@ class Zone(BaseModel):
 class ZonesList:
     """
     Структура для хранения и работы со списком зон.
-    Позволяет получать отдельно зону самовывоза, или все остальные зоны.
+    Помимо получения всех добавленных в нее зон,
+    позволяет получать отдельно зону самовывоза, или все остальные зоны кроме самовывоза.
     """
     def __init__(self, zones: List[Zone]):
         self.self_delivery_zone: Zone | None = None
         self.delivery_zones: list[Zone] = []
-        self.zones: list[Zone] = zones
+        self.all_zones: list[Zone] = zones
 
         for zone in zones:
             if zone.name == "Пункт самовывоза":
@@ -79,34 +79,41 @@ class ZonesList:
                 self.delivery_zones.append(zone)
 
     def __len__(self) -> int:
-        return len(self.zones)
+        return len(self.all_zones)
 
     def __getitem__(self, item) -> Zone:
-        return self.zones[item]
+        return self.all_zones[item]
 
     def __contains__(self, item) -> bool:
-        return item in self.zones
+        return item in self.all_zones
 
     def __str__(self) -> str:
-        return str(self.zones)
+        return str(self.all_zones)
 
     def __repr__(self) -> str:
-        return "ZonesList(" + ",".join(f"{zone.name}" for zone in self.zones) + ")"
+        return "ZonesList(" + ",".join(f"{zone.name}" for zone in self.all_zones) + ")"
 
     def __eq__(self, other) -> bool:
-        return self.zones == other.zones
+        return self.all_zones == other.all_zones
 
     def __ne__(self, other) -> bool:
-        return self.zones != other.zones
+        return self.all_zones != other.all_zones
 
     def get_self_delivery_zone(self) -> Zone:
+        """Получить зону самовывоза"""
         return self.self_delivery_zone
 
     def get_delivery_zones(self) -> list[Zone]:
+        """Получить список зон доставки"""
         return self.delivery_zones
 
+    def get_all_zones(self) -> list[Zone]:
+        """Получить список всех зон"""
+        return self.all_zones
+
     def append(self, zone: Zone) -> None:
-        self.zones.append(zone)
+        """Добавить зону в ZonesList"""
+        self.all_zones.append(zone)
         if zone.name == "Пункт самовывоза":
             self.self_delivery_zone = zone
         else:
