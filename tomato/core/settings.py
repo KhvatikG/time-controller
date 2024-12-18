@@ -57,7 +57,8 @@ class Settings(BaseSettings):
 
     # Дефолтные значения времени
     DEFAULT_ZONES_TIMES: dict = {
-        "AZOV_ALL_ORGANIZATIONS": 40
+        "AZOV_ALL_ORGANIZATIONS": 40,
+        "SELF-DELIVERY_ALL_ORGANIZATIONS": 15,
     }
 
     # thread_id - id треда в группе
