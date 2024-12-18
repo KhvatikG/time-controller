@@ -47,7 +47,7 @@ async def reminder():
             continue
 
         try:
-            time_string = get_current_waiting_time_string(organization_id, token)
+            time_string = get_current_waiting_time_string(organization_id, token, for_all_zones=True)
         except Exception as e:
             await bot.send_message(
                 SETTINGS.MAIN_CHAT_ID,
