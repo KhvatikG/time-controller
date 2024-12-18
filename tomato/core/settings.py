@@ -12,6 +12,7 @@ load_dotenv()  # Загружаем переменные среды из .env
 class Settings(BaseSettings):
 
     MAIN_CHAT_ID: int = -1002351370021
+    ORDER_CLOSER_CHAT_ID: int = -1004716834204
 
     BOT_TOKEN: str
 
@@ -65,7 +66,7 @@ class Settings(BaseSettings):
     KRUG: int = 2
     KULT: int = 3
     GONZO: int = 4
-    # Список всех тредов
+    # Список тредов всех заведений
     THREAD_ID_LIST: list = [KRUG, KULT, GONZO]
 
     # Сопоставление thread_id с id организации в смартомато
@@ -74,6 +75,8 @@ class Settings(BaseSettings):
         KULT: 45128,
         GONZO: 45622
     }
+
+    ORDER_CLOSER_API_URL: str
 
     def get_organization_id(self, message_thread_id):
         """
