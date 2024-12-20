@@ -23,7 +23,7 @@ async def close_orders() -> None:
     logger.info('Токен получен')
     logger.info('Закрытие заказов...')
     try:
-        url = SETTINGS.ORDER_CLOSER_API_URL
+        url = SETTINGS.ORDER_CLOSER_API_URL + '/orders/close-confirmed'
         response = requests.post(url, json={'token': token})
 
         response.raise_for_status()
