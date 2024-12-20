@@ -7,9 +7,8 @@ LABEL authors="Игорь"
 WORKDIR /app
 
 # Установка необходимых системных зависимостей и poetry
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
@@ -24,7 +23,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY pyproject.toml poetry.lock ./
 
 # Установка зависимостей
-RUN poetry install --no-root
+RUN poetry install --no-root --no-dev
 
 # Копирование исходного кода
 COPY . .
