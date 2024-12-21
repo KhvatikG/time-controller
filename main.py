@@ -119,7 +119,8 @@ async def main() -> None:
     default_time_trigger = CronTrigger(hour=22, minute=30, timezone=timezone('Europe/Moscow'))
     scheduler.add_job(set_default_time, trigger=default_time_trigger)
     # Добавление в скедулер закрытие заказов
-    scheduler.add_job(close_orders, trigger=default_time_trigger)
+    close_orders_time_trigger = CronTrigger(hour=22, minute=50, timezone=timezone('Europe/Moscow'))
+    scheduler.add_job(close_orders, trigger=close_orders_time_trigger)
 
     # Добавление в скедулер напоминания о поддержании времени в актуальном состоянии
     reminder_trigger = IntervalTrigger(hours=2)

@@ -88,7 +88,7 @@ def get_current_waiting_time_string(
             self_delivery_zone: Zone = zones.get_self_delivery_zone()
             waiting_times_string: str = "\n".join(f"{html.bold(zone.name)}:\n -Готовка: {zone.cooking_time} минут\n"
                                                   f" -Транспортировка: {zone.transportation_time} минут \n"
-                                                  f" -Общее: {zone.delivery_time} минут\n" for zone in delivery_zones)
+                                                  f" -Общее: {zone.delivery_time} минут\n\n" for zone in delivery_zones)
             waiting_times_string += f"{html.bold(self_delivery_zone.name)}: {self_delivery_zone.delivery_time} минут\n"
 
         elif for_self_delivery:  # Если нужно получить время для самовывоза
