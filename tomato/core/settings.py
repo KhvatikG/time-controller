@@ -12,15 +12,27 @@ load_dotenv()  # Загружаем переменные среды из .env
 class Settings(BaseSettings):
 
     MAIN_CHAT_ID: int = -1002351370021
-    ORDER_CLOSER_CHAT_ID: int = -1004716834204
 
     BOT_TOKEN: str
 
     TOMATO_LOGIN: str
     TOMATO_PASSWORD: str
 
+    # Postgres
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
+    POSTGRES_HOST: str = 'localhost'  # Для локальной разработки
+    POSTGRES_PORT: int = 5432
+
+    @property
+    def DB_URI(self) -> str:
+        return (
+            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
+
     BASE_API_URL: str = "http://smartomato.ru/api"
-    DB_URI: str = 'sqlite+aiosqlite:///' + os.path.join(ROOT_DIR, 'db/db.sqlite3')
 
     # Режим работы заведений
     TIME_OPEN: int = 10

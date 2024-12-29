@@ -14,7 +14,7 @@ def parse_user(userdata: str) -> dict:
 
     userdata = userdata.split(',')
     user = {
-        "id": userdata[0].strip(),
+        "id": int(userdata[0].strip()),
         "name": userdata[1].strip(),
     }
     if len(userdata) > 2:
