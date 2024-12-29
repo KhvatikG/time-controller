@@ -76,7 +76,7 @@ class Settings(BaseSettings):
         GONZO: 45622
     }
 
-    ORDER_CLOSER_API_URL: str
+    ORDERS_CLOSER_API_URL: str
 
     def get_organization_id(self, message_thread_id):
         """
