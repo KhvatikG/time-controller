@@ -20,11 +20,10 @@ def authorized_only(handler):
             result = await session.execute(select(User).where(User.id == message.from_user.id))
             user = result.scalars().one_or_none()
 
-            logger.debug(f"Пользователь найден в БД: {user}")
-
         if user:
             logger.debug(f"Пользователь авторизован: {user}")
             return await handler(message, *args, **kwargs)
+
         else:
             return await message.reply("У вас нет доступа к этой операции.")
 
