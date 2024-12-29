@@ -11,6 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
 
 from close_orders import close_orders
+from close_orders_handler import order_closer_router
 from self_delivery import self_delivery_router
 from broadcast import broadcast_router
 from db.models.base import Base
@@ -52,6 +53,7 @@ dp.include_routers(
     user_control_router,
     broadcast_router,
     self_delivery_router,
+    order_closer_router
 )
 
 
@@ -116,10 +118,10 @@ async def main() -> None:
     scheduler = AsyncIOScheduler(timezone=timezone('Europe/Moscow'))
 
     # Добавление в скедулер сброса времени на дефолт по расписанию
-    default_time_trigger = CronTrigger(hour=22, minute=30, timezone=timezone('Europe/Moscow'))
+    default_time_trigger = CronTrigger(hour=23, minute=20, timezone=timezone('Europe/Moscow'))
     scheduler.add_job(set_default_time, trigger=default_time_trigger)
     # Добавление в скедулер закрытие заказов
-    close_orders_time_trigger = CronTrigger(hour=22, minute=50, timezone=timezone('Europe/Moscow'))
+    close_orders_time_trigger = CronTrigger(hour=23, minute=20, timezone=timezone('Europe/Moscow'))
     scheduler.add_job(close_orders, trigger=close_orders_time_trigger)
 
     # Добавление в скедулер напоминания о поддержании времени в актуальном состоянии
