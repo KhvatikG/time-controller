@@ -2,7 +2,7 @@ import enum
 
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
-from sqlalchemy import String, Enum
+from sqlalchemy import String, Enum, BigInteger
 
 from .base import Base
 
@@ -15,7 +15,7 @@ class UserRole(enum.Enum):
 class User(Base):
     __tablename__ = 'users'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
 
