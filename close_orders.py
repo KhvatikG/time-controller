@@ -8,6 +8,7 @@ from db.models.order_closer_chat import OrderCloserChat
 from db.session import get_session
 from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
+from tomato.report import get_order_report_by_departments
 
 
 async def get_all_chats() -> list[OrderCloserChat]:
@@ -62,7 +63,6 @@ async def close_orders() -> None:
 
         response.raise_for_status()
         logger.info('Заказы закрыты')
-
         response = response.json()
         for chat in chats:
             chat_id = chat.id
@@ -70,6 +70,27 @@ async def close_orders() -> None:
             await bot.send_message(chat_id, response.get('message'))
 
         logger.info('Рассылка отчетов по закрытию заказов завершена')
+
+        df = get_order_report_by_departments(token=token)
+        for i, row in df.iterrows():
+            department = row.get('Ресторан')
+            count_orders = row.get('Количество заказов')
+            count_cancelled_orders = row.get('Количество отменённых')
+            # средний чек
+            avg_check = row.get('Средний чек')
+            delivery_sum = row.get('Сумма доставки для клиента')
+            summ = row.get('Сумма по всем заказам')
+            message = f"""
+            Отчет по закрытию заказов:
+            Ресторан: {department}
+            Количество заказов: {count_orders}
+            Количество отменённых: {count_cancelled_orders}
+            Средний чек: {avg_check}
+            Сумма доставки для клиента: {delivery_sum}
+            Сумма по всем заказам: {summ}
+            """
+            for chat in chats:
+                await bot.send_message(chat.id, message)
 
     except Exception as e:
         err = f'Ошибка при закрытии заказов: {e}'
