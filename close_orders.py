@@ -1,4 +1,8 @@
+from io import BytesIO
+
+import pandas as pd
 import requests
+from aiogram import types
 from aiogram.enums import ParseMode
 from aiogram.utils.markdown import bold, italic
 
@@ -93,6 +97,21 @@ async def close_orders() -> None:
             for chat in chats:
                 await bot.send_message(chat.id, bold(f"Краткий отчет по приложению:"), parse_mode=ParseMode.MARKDOWN)
                 await bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN)
+
+        # Создаем Excel в памяти
+        excel_buffer = BytesIO()
+
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Данные')
+        excel_buffer.seek(0)
+
+        # Формируем сообщение с подписью и файлом
+        caption_text = "📊 Подробный отчет во вложении"
+        document = types.BufferedInputFile(excel_buffer.read(), filename="report.xlsx"),
+
+        for chat in chats:
+            chat = chat.id
+            await bot.send_document(chat, document=document, caption=caption_text)
 
     except Exception as e:
         err = f'Ошибка при закрытии заказов: {e}'
