@@ -1,4 +1,6 @@
 import requests
+from aiogram.enums import ParseMode
+from aiogram.utils.markdown import bold, italic
 
 from loguru import logger
 from sqlalchemy import select
@@ -81,16 +83,16 @@ async def close_orders() -> None:
             delivery_sum = row.get('Сумма доставки для клиента')
             summ = row.get('Сумма по всем заказам')
             message = f"""
-            Отчет по закрытию заказов:
-            Ресторан: {department}
-            Количество заказов: {count_orders}
-            Количество отменённых: {count_cancelled_orders}
-            Средний чек: {avg_check}
-            Сумма доставки для клиента: {delivery_sum}
-            Сумма по всем заказам: {summ}
+            Ресторан: {bold(department)}\n
+            Количество заказов: {italic(count_orders)}
+            Количество отменённых: {italic(count_cancelled_orders)}
+            Средний чек: {round(avg_check, 2)}
+            Сумма доставки для клиента: {italic(delivery_sum)}
+            Сумма по всем заказам: {bold(summ)}
             """
             for chat in chats:
-                await bot.send_message(chat.id, message)
+                await bot.send_message(chat.id, bold(f"Краткий отчет по приложению:"), parse_mode=ParseMode.MARKDOWN)
+                await bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN)
 
     except Exception as e:
         err = f'Ошибка при закрытии заказов: {e}'
