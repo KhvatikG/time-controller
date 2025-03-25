@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
@@ -74,6 +75,7 @@ async def close_orders() -> None:
             chat_id = chat.id
             await bot.send_message(chat_id, 'Заказы закрыты')
             await bot.send_message(chat_id, response.get('message'))
+            await bot.send_message(chat.id, bold(f"Краткий отчет по приложению:"), parse_mode=ParseMode.MARKDOWN)
 
         logger.info('Рассылка отчетов по закрытию заказов завершена')
 
@@ -82,36 +84,35 @@ async def close_orders() -> None:
             department = row.get('Ресторан')
             count_orders = row.get('Количество заказов')
             count_cancelled_orders = row.get('Количество отменённых')
-            # средний чек
             avg_check = row.get('Средний чек')
             delivery_sum = row.get('Сумма доставки для клиента')
             summ = row.get('Сумма по всем заказам')
-            message = f"""
-            Ресторан: {bold(department)}\n
-            Количество заказов: {italic(count_orders)}
-            Количество отменённых: {italic(count_cancelled_orders)}
-            Средний чек: {round(avg_check, 2)}
-            Сумма доставки для клиента: {italic(delivery_sum)}
-            Сумма по всем заказам: {bold(summ)}
-            """
+            message = (
+                f"Ресторан: {bold(department)}\n"
+                f"  Количество заказов: {italic(count_orders)}\n"
+                f"  Отменённых: {italic(count_cancelled_orders)}\n"
+                f"  Средний чек: {italic(round(avg_check, 2))}\n"
+                f"  Сумма доставки для клиента: {italic(delivery_sum)}\n"
+                f"  Сумма по всем заказам: {bold(summ)}\n"
+            )
             for chat in chats:
-                await bot.send_message(chat.id, bold(f"Краткий отчет по приложению:"), parse_mode=ParseMode.MARKDOWN)
                 await bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN)
 
         # Создаем Excel в памяти
-        excel_buffer = BytesIO()
+        #excel_buffer = BytesIO()
 
-        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Данные')
-        excel_buffer.seek(0)
+        #with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+        #    df.to_excel(writer, index=False, sheet_name='Дневной отчет')
+        #excel_buffer.seek(0)
 
         # Формируем сообщение с подписью и файлом
-        caption_text = "📊 Подробный отчет во вложении"
-        document = types.BufferedInputFile(excel_buffer.read(), filename="report.xlsx"),
+        #caption_text = "📊 Подробный отчет во вложении"
+        #date = datetime.now().strftime('%Y-%m-%d')
+        #document = types.BufferedInputFile(excel_buffer.read(), filename=f"report_{date}.xlsx"),
 
-        for chat in chats:
-            chat = chat.id
-            await bot.send_document(chat, document=document, caption=caption_text)
+        #for chat in chats:
+        #    chat = chat.id
+        #    await bot.send_document(chat, document=document, caption=caption_text)
 
     except Exception as e:
         err = f'Ошибка при закрытии заказов: {e}'
