@@ -91,7 +91,7 @@ async def close_orders() -> None:
                 f"Ресторан: {bold(department)}\n"
                 f"  Количество заказов: {italic(count_orders)}\n"
                 f"  Отменённых: {italic(count_cancelled_orders)}\n"
-                f"  Средний чек: {italic(round(avg_check, 2))}\n"
+                f"  Средний чек: {round(avg_check, 2)}\n"
                 f"  Сумма доставки для клиента: {italic(delivery_sum)}\n"
                 f"  Сумма по всем заказам: {bold(summ)}\n"
             )
