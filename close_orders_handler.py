@@ -52,7 +52,7 @@ async def register_chat_for_order_closer(message: Message) -> None:
         logger.exception("Ошибка при регистрации чата")
 
 
-@order_closer_router.message(F.text.startswith('del_caht'))
+@order_closer_router.message(F.text.startswith('del_this_chat'))
 async def delete_chat(message: Message) -> None:
     """
     Удаляет чат из списка чатов для отчетов по закрытию заказов
@@ -129,3 +129,42 @@ async def get_chats(message: Message) -> None:
     except Exception as e:
         await message.answer(f'Ошибка при получении списка чатов: {e}')
         logger.exception("Ошибка при получении списка чатов")
+
+
+@order_closer_router.message(F.text.startswith('del_chat'))
+async def delete_chat_by_id(message: Message) -> None:
+    """
+    Удаляет чат id которого у казан в комманде
+    :param message:
+    :return:
+    """
+    logger.info(f'Удаление чата по id')
+
+    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
+        logger.warning(f"Пользователь {message.from_user.id} не является супер-админом")
+        await message.answer('У вас нет прав на выполнение данной команды')
+        return
+
+    logger.info(f'Пользователь инициировавший удаление авторизован: id: {message.from_user.id}')
+
+    logger.info(f'Получаем чат из БД')
+    try:
+        chat_id = int(message.text.split()[1])
+        async with get_session() as session:
+            chat = await session.get(OrderCloserChat, chat_id).scalar_one_or_none()
+            if not chat:
+                logger.info(f"Чат с таким id не зарегистрирован")
+                await message.answer(f'Чат с таким id не зарегистрирован')
+                return
+
+            logger.info(f'Удаляем чат из БД')
+            session.delete(chat)
+            await session.commit()
+            await message.answer(f'Чат успешно удален')
+            logger.info(f'Чат успешно удален')
+    except SQLAlchemyError as e:
+        await message.answer(f'Ошибка SQLAlchemy при удалении чата: {e}')
+        logger.exception("Ошибка SQLAlchemy при удалении чата")
+    except Exception as e:
+        await message.answer(f'Ошибка при удалении чата: {e}')
+        logger.exception("Ошибка при удалении чата")
