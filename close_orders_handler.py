@@ -151,7 +151,8 @@ async def delete_chat_by_id(message: Message) -> None:
     try:
         chat_id = int(message.text.split()[1])
         async with get_session() as session:
-            chat = await session.get(OrderCloserChat, chat_id).scalar_one_or_none()
+            result = await session.execute(select(OrderCloserChat).where(OrderCloserChat.id == chat_id))
+            chat = result.scalar_one_or_none()
             if not chat:
                 logger.info(f"Чат с таким id не зарегистрирован")
                 await message.answer(f'Чат с таким id не зарегистрирован')
