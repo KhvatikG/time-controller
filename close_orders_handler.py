@@ -90,3 +90,42 @@ async def delete_chat(message: Message) -> None:
     except Exception as e:
         await message.answer(f'Ошибка при удалении чата: {e}')
         logger.exception("Ошибка при удалении чата")
+
+
+@order_closer_router.message(F.text.startswith('get_chats'))
+async def get_chats(message: Message) -> None:
+    """
+    Возвращает список чатов для отчетов по закрытию заказов
+
+    :param message:
+    :return:
+    """
+    logger.info(f'Получение списка чатов')
+
+    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
+        logger.warning(f"Пользователь {message.from_user.id} не является супер-админом")
+        await message.answer('У вас нет прав на выполнение данной команды')
+        return
+
+    logger.info(f'Пользователь инициировавший запрос списка чатов авторизован: id:{message.from_user.id}')
+
+    try:
+        logger.info(f'Получаем список чатов из БД')
+        async with get_session() as session:
+            result = await session.execute(select(OrderCloserChat))
+            chats = result.scalars().all()
+            if not chats:
+                logger.info(f"Список чатов пуст")
+                await message.answer(f'Список чатов пуст')
+                return
+            logger.info(f'Список чатов получен')
+            for chat in chats:
+                logger.info(f'Чат: {chat.id}')
+                await message.answer(f'Чат: {chat.id}')
+            logger.info(f'Список чатов отправлен')
+    except SQLAlchemyError as e:
+        await message.answer(f'Ошибка SQLAlchemy при получении списка чатов: {e}')
+        logger.exception("Ошибка SQLAlchemy при получении списка чатов")
+    except Exception as e:
+        await message.answer(f'Ошибка при получении списка чатов: {e}')
+        logger.exception("Ошибка при получении списка чатов")
