@@ -158,8 +158,9 @@ async def delete_chat_by_id(message: Message) -> None:
                 await message.answer(f'Чат с таким id не зарегистрирован')
                 return
 
+            logger.info(f'Получен чат из БД {chat}, id: {chat.id}, create_user_id: {chat.create_user_id}')
             logger.info(f'Удаляем чат из БД')
-            session.delete(chat)
+            await session.delete(chat)
             await session.commit()
             await message.answer(f'Чат успешно удален')
             logger.info(f'Чат успешно удален')
