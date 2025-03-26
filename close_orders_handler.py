@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.order_closer_chat import OrderCloserChat
 from db.session import get_session
 from tomato.core.settings import SETTINGS
+from reports import send_departments_report
 
 order_closer_router = Router()
 
@@ -170,3 +171,36 @@ async def delete_chat_by_id(message: Message) -> None:
     except Exception as e:
         await message.answer(f'Ошибка при удалении чата: {e}')
         logger.exception("Ошибка при удалении чата")
+
+
+@order_closer_router.message(F.text.startswith('get_report_from'))
+async def get_report_from(message: Message) -> None:
+    """
+    Отправляет отчет по закрытию заказов за указанный период времени
+    :param message:
+    :return:
+    """
+    logger.info(f'Получение отчета по закрытию заказов')
+
+    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
+        logger.warning(f"Пользователь {message.from_user.id} не является супер-админом")
+        await message.answer('У вас нет прав на выполнение данной команды')
+        return
+
+    logger.info(f'Пользователь инициировавший запрос отчета авторизован: id:{message.from_user.id}')
+
+    date_from = message.text.split()[1]
+    chat_id = message.chat.id
+    async with get_session() as session:
+        logger.info(f'Получаем чат из БД')
+        result = await session.execute(select(OrderCloserChat).where(OrderCloserChat.id == chat_id))
+        chat = result.scalars().one_or_none()
+        if not chat:
+            logger.info(f"Чат не найден")
+            await message.answer(f'Чат не найден')
+
+        logger.info(f'Получен чат из БД: id: {chat.id}, create_user_id: {chat.create_user_id}')
+
+    logger.info(f'Отправляем отчет по закрытию заказов...')
+    await send_departments_report(date_from, [chat])
+    logger.info(f'Отчет по закрытию заказов отправлен')
