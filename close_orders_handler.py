@@ -1,7 +1,7 @@
 from aiogram import Router
 from aiogram.types import Message
 from loguru import logger
-from magic_filter import F
+from aiogram import F
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
