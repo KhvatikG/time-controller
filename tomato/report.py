@@ -4,6 +4,7 @@ from urllib.parse import quote
 import io
 
 import requests
+from loguru import logger
 
 
 def get_order_report_by_departments_html(token: str, date: str = "now"):
@@ -49,6 +50,7 @@ def get_order_report_by_departments(token: str, date: str = "now") -> pd.DataFra
     :param date: дата в формате YYYY-MM-DD по умолчанию - сегодняшняя дата
     """
 
+    logger.debug("Запрос на получение отчета по заказам по отделам")
     # URL запроса
     url = "https://app.smartomato.ru/api/reports/perform.xlsx"
 
@@ -61,6 +63,7 @@ def get_order_report_by_departments(token: str, date: str = "now") -> pd.DataFra
     date_from = f"{date}{start_time}"
     date_to = f"{date}{end_time}"
 
+    logger.info(f"Получаем отчет по заказам по отделам за {date_from} - {date_to}")
     # Пример фильтра в формате JSON (экранирован для URL)
     # Здесь подставляются даты
     filter_json = (
@@ -88,7 +91,8 @@ def get_order_report_by_departments(token: str, date: str = "now") -> pd.DataFra
     # Отправляем GET-запрос
     response = requests.get(url, params=params)
     response.raise_for_status()  # выбросит исключение при ошибке
-
+    logger.success("Отчет получен")
+    logger.debug(response.text)
     # Сохраняем CSV-данные (или сразу читаем в DataFrame)
     text_data = response.content
     print(text_data)
@@ -104,5 +108,5 @@ def get_order_report_by_departments(token: str, date: str = "now") -> pd.DataFra
     df = pd.read_excel(
         io.BytesIO(text_data),
     )
-
+    logger.debug(f"{df=}")
     return df
