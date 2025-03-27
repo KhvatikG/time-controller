@@ -64,3 +64,23 @@ async def get_users(message: Message):
             await message.answer('\n-----------------\n'.join(users_list))
     except Exception as e:
         await message.answer(f'Ошибка получения списка пользователей: {e}')
+
+
+@user_control_router.message(F.text.startswith('deluser'))
+async def del_user(message: Message):
+    """Перехватчик удаления пользователя"""
+    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
+        await message.answer('У вас нет прав на выполнение данной команды')
+        return
+    try:
+        async with get_session() as session:
+            result = await session.execute(select(User).where(User.id == int(message.text.lstrip('deluser'))))
+            user = result.scalar_one_or_none()
+            if not user:
+                await message.answer(f'Пользователь с данным id не найден')
+                return
+            await session.delete(user)
+            await session.commit()
+            await message.answer(f'Пользователь {user.name} удален')
+    except Exception as e:
+        await message.answer(f'Ошибка удаления пользователя: {e}')
