@@ -1,5 +1,4 @@
 from aiogram.enums import ParseMode
-from aiogram.utils.markdown import bold, italic
 
 from bot_init import bot
 from db.models.order_closer_chat import OrderCloserChat
@@ -28,16 +27,16 @@ async def send_departments_report(date: str = None, chats: list[OrderCloserChat]
         count_cancelled_orders = row.get('Количество отменённых')
         avg_check = row.get('Средний чек')
         delivery_sum = row.get('Сумма доставки для клиента')
-        summ = row.get('Сумма по всем заказам')
+        summ = str(row.get('Сумма по всем заказам'))
         message = (
-            f"Ресторан: {bold(department)}\n"
-            f"  Количество заказов: {italic(count_orders)}\n"
-            f"  Отменённых: {italic(count_cancelled_orders)}\n"
-            f"  Средний чек: {round(avg_check, 2)}\n"
-            f"  Сумма доставки для клиента: {italic(delivery_sum)}\n"
-            f"  Сумма по всем заказам: {bold(summ)}\n"
+            f"Ресторан: <b>{department}</b>\n"
+            f"  Количество заказов: <i>{count_orders}</i>\n"
+            f"  Отменённых: <i>{count_cancelled_orders}</i>\n"
+            f"  Средний чек: <i>{round(avg_check, 2)}</i>\n"
+            f"  Сумма доставки для клиента: <i>{delivery_sum}</i>\n"
+            f"  Сумма по всем заказам: <b>{summ}</b>\n"
         )
         logger.info(f"Сообщение построено\n{message}")
         logger.info("Отправка сообщения")
         for chat in chats:
-            await bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN)
+            await bot.send_message(chat.id, message, parse_mode=ParseMode.HTML)
