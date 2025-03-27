@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from db.models.order_closer_chat import OrderCloserChat
 from db.session import get_session
+from decorators import admin_user_only
 from tomato.core.settings import SETTINGS
 from reports import send_departments_report
 
@@ -174,18 +175,17 @@ async def delete_chat_by_id(message: Message) -> None:
 
 
 @order_closer_router.message(F.text.startswith('get_report_from'))
+@admin_user_only
 async def get_report_from(message: Message) -> None:
     """
     Отправляет отчет по закрытию заказов за указанный период времени
-    :param message:
-    :return:
     """
     logger.info(f'Получение отчета по закрытию заказов')
 
-    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
-        logger.warning(f"Пользователь {message.from_user.id} не является супер-админом")
-        await message.answer('У вас нет прав на выполнение данной команды')
-        return
+    #if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
+    #    logger.warning(f"Пользователь {message.from_user.id} не является супер-админом")
+    #    await message.answer('У вас нет прав на выполнение данной команды')
+    #    return
 
     logger.info(f'Пользователь инициировавший запрос отчета авторизован: id:{message.from_user.id}')
 
