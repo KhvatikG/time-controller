@@ -84,3 +84,26 @@ async def del_user(message: Message):
             await message.answer(f'Пользователь {user.name} удален')
     except Exception as e:
         await message.answer(f'Ошибка удаления пользователя: {e}')
+
+
+@user_control_router.message(F.text.startswith('updateuser'))
+async def update_user(message: Message):
+    """Перехватчик обновления пользователя"""
+    if message.from_user.id != SETTINGS.SUPER_ADMIN_ID:
+        await message.answer('У вас нет прав на выполнение данной команды')
+        return
+    try:
+        user_dict = parse_user(message.text.lstrip('updateuser'))
+        async with get_session() as session:
+            result = await session.execute(select(User).where(User.id == user_dict["id"]))
+            user = result.scalar_one_or_none()
+            if not user:
+                await message.answer(f'Пользователь с данным id не найден')
+                return
+            user.name = user_dict["name"]
+            user.role = user_dict.get("role")
+            await session.commit()
+            await message.answer(f'Пользователь {user.name} обновлен')
+
+    except Exception as e:
+        await message.answer(f'Ошибка обновления пользователя: {e}')
