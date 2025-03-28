@@ -21,6 +21,8 @@ async def send_departments_report(date: str = None, chats: list[OrderCloserChat]
     df = get_order_report_by_departments(date=date, token=token)
     logger.debug(f"Отчет получен\n{df}")
     logger.info("Начинаю построение сообщений...")
+
+    messages = []
     for i, row in df.iterrows():
         department = row.get('Ресторан')
         count_orders = row.get('Количество заказов')
@@ -38,5 +40,17 @@ async def send_departments_report(date: str = None, chats: list[OrderCloserChat]
         )
         logger.info(f"Сообщение построено\n{message}")
         logger.info("Отправка сообщения")
-        for chat in chats:
+        messages.append(message)
+
+    if len(df) == 0:
+        message = (
+            f"За выбранный период данных нет."
+        )
+        logger.info(f"Сообщение построено\n{message}")
+        logger.info("Отправка сообщения")
+        messages.append(message)
+
+    # Отправка сообщений
+    for chat in chats:  # В каждый зарегистрированный чат
+        for message in messages:  # Каждое сообщение
             await bot.send_message(chat.id, message, parse_mode=ParseMode.HTML)
