@@ -92,19 +92,9 @@ def get_order_report_by_departments(token: str, date: str = "now") -> pd.DataFra
     response = requests.get(url, params=params)
     response.raise_for_status()  # выбросит исключение при ошибке
     logger.success("Отчет получен")
-    logger.debug(response.text)
     # Сохраняем CSV-данные (или сразу читаем в DataFrame)
     text_data = response.content
-    print(text_data)
 
-    """# Чтение данных через StringIO с настройками для парсинга
-    df = pd.read_csv(
-        io.StringIO(text_data),
-        sep=';',          # Разделитель — точка с запятой
-        quotechar='"',     # Обрамление значений в кавычки
-        dtype=str,        # Сохранить все данные как строки
-        keep_default_na=False  # Не заменять пустые строки на NaN
-    )"""
     df = pd.read_excel(
         io.BytesIO(text_data),
     )
