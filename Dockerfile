@@ -23,7 +23,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY pyproject.toml poetry.lock ./
 
 # Установка зависимостей
-RUN poetry install --no-root --no-dev
+RUN poetry install --no-root
 
 # Копирование исходного кода
 COPY . .
