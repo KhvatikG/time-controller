@@ -5,14 +5,22 @@ from aiogram import html
 
 from loguru import logger
 
+from db.models.change_time_log import ForOrderType
 from models.zone import ZonesList, Zone
 from tomato.core.api.zones import get_all_zones_of_organization, update_zone
 from tomato.core.settings import SETTINGS
+from utils import fix_change_to_db_log
 
 
-def set_waiting_time(organization_id: int, waiting_time: int, token: str, for_self_delivery: bool = False) -> None:
+async def set_waiting_time(
+        organization_id: int,
+        waiting_time: int,
+        token: str,
+        for_self_delivery: bool = False
+) -> None:
     """
     Устанавливает время ожидания в зонах отдела с id department_id.
+    И записывает в журнал в бд.
 
     :param for_self_delivery: Если True, то устанавливается время ожидания только для самовывоза
     :param waiting_time: Общее время ожидания в минутах для базовой зоны(Азов)
@@ -45,6 +53,12 @@ def set_waiting_time(organization_id: int, waiting_time: int, token: str, for_se
 
                 # Отправляем обновление зоны на сервер
                 update_zone(zone=delivery_zone, token=token)
+                # Добавляем строку в журнал в бд
+                await fix_change_to_db_log(
+                    organization_id,
+                    waiting_time,
+                    ForOrderType("Доставка")
+                )
 
         else:  # Если нужно установить время для самовывоза
             self_delivery_zone: Zone = zones.get_self_delivery_zone()
@@ -55,6 +69,12 @@ def set_waiting_time(organization_id: int, waiting_time: int, token: str, for_se
 
             # Отправляем обновление зоны на сервер
             update_zone(zone=self_delivery_zone, token=token)
+            # Добавляем строку в журнал в бд
+            await fix_change_to_db_log(
+                organization_id,
+                waiting_time,
+                ForOrderType("Самовывоз")
+            )
 
     except Exception as e:
         err = f"Ошибка в set_waiting_time: {e}"

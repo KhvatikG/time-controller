@@ -30,9 +30,9 @@ async def set_default_time() -> None:
         # Перебираем id тредов и id организаций
         for thread_id, organization_id in SETTINGS.CHAT_ID_TO_ORGANIZATION_ID.items():
             # Устанавливаем дефолтное время для зон доставки
-            set_waiting_time(organization_id, default_delivery_time, token)
+            await set_waiting_time(organization_id, default_delivery_time, token)
             # Устанавливаем дефолтное время для самовывоза
-            set_waiting_time(
+            await set_waiting_time(
                 organization_id, default_self_delivery_time, token, for_self_delivery=True
             )
             # Поучаем строку с информацией о текущем времени ожидания во всех зонах включая самовывоз

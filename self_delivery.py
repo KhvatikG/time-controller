@@ -58,7 +58,7 @@ async def self_delivery(message: types.Message):
         # Устанавливаем время самовывоза
         try:
             token = get_tomato_auth_token()
-            set_waiting_time(organization_id, time, token, for_self_delivery=True)
+            await set_waiting_time(organization_id, time, token, for_self_delivery=True)
             time_string = get_current_waiting_time_string(organization_id, token, for_self_delivery=True)
             await message.answer(time_string)
 

@@ -1,10 +1,7 @@
-import os
-
 from dotenv import load_dotenv
 
 from pydantic_settings import BaseSettings
 
-from root_path import ROOT_DIR
 
 load_dotenv()  # Загружаем переменные среды из .env
 
@@ -22,8 +19,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
-    POSTGRES_HOST: str = 'localhost'  # Для локальной разработки
-    POSTGRES_PORT: int = 5432
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
 
     @property
     def DB_URI(self) -> str:
@@ -86,6 +83,13 @@ class Settings(BaseSettings):
         KRUG: 44166,
         KULT: 45128,
         GONZO: 45622
+    }
+
+    # Сопоставление id организации с названием заведения
+    NAME_TO_ORGANIZATION_ID: dict = {
+        "КРУГ": 44166,
+        "КУЛЬТ ЕДЫ": 45128,
+        "GONZO": 45622
     }
 
     ORDERS_CLOSER_API_URL: str

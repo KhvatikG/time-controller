@@ -96,7 +96,7 @@ async def echo_handler(message: Message) -> None:
     try:
         time = int(message.text)
         token = get_tomato_auth_token()
-        set_waiting_time(organization_id, time, token)
+        await set_waiting_time(organization_id, time, token)
         time_string = get_current_waiting_time_string(organization_id, token)
         await message.answer(time_string)
     except Exception as e:
