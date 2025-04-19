@@ -1,0 +1,102 @@
+from datetime import datetime
+
+from aiogram.enums import ParseMode
+
+from bot_init import bot
+from db.models.order_closer_chat import OrderCloserChat
+from db.session import get_session
+from reports.waiting_report import get_daily_time_report
+from tomato.core.api.auth import get_tomato_auth_token
+from tomato.core.settings import SETTINGS
+from tomato.report import get_order_report_by_departments
+from loguru import logger
+
+from utils import get_organization_id_per_name
+
+
+async def send_departments_report(date: str = "now", chats: list[OrderCloserChat] = None) -> None:
+    """Отправляет дневной в чат
+
+    :param chats: Чаты для отправки отчета
+    :param date: дата в формате YYYY-MM-DD по умолчанию None - будет использована сегодняшняя дата
+    """
+    if date == "now":
+        date = datetime.now().strftime("%Y-%m-%d")
+
+    logger.info("Отправка дневного отчета по отделам")
+    logger.debug("Получение токена")
+    token = get_tomato_auth_token()
+
+    logger.debug("Получение дневного отчета")
+    df = get_order_report_by_departments(date=date, token=token)
+    logger.debug(f"Отчет получен\n{df}")
+    logger.info("Начинаю построение сообщений...")
+
+    messages = []
+    for i, row in df.iterrows():
+        department = row.get('Ресторан')
+        count_orders = row.get('Количество заказов')
+        count_cancelled_orders = row.get('Количество отменённых')
+        avg_check = row.get('Средний чек')
+        delivery_sum = row.get('Сумма доставки для клиента')
+        summ = str(row.get('Сумма по всем заказам'))
+
+        department_id = str(get_organization_id_per_name(department))
+        async with get_session() as session:
+            waiting_report_data = await get_daily_time_report(session, department_id, datetime.fromisoformat(date))
+
+        # Переводим множества в строки для отправки в телеграм
+        delivery_periods = waiting_report_data.get("Доставка").get('max_periods')
+        if delivery_periods:
+            delivery_periods_strings = "\n    ".join(
+                [f"{period.get('start').strftime('%H:%M')} - {period.get('end').strftime('%H:%M')}"
+                 for period in delivery_periods]
+            )
+        else:
+            delivery_periods_strings = ["нет данных"]
+
+        pickup_periods = waiting_report_data.get("Самовывоз").get('max_periods')
+        if pickup_periods:
+            pickup_periods_strings = "\n    ".join(
+                [f"{period.get('start').strftime('%H:%M')} - {period.get('end').strftime('%H:%M')}"
+                 for period in pickup_periods]
+            )
+        else:
+            pickup_periods_strings = ["нет данных"]
+
+        message = (
+            f"Ресторан: <b>{department}</b>\n"
+            f"<b>──────────────────────────────────────────</b>\n"
+            f"  Количество заказов: <i>{count_orders}</i>\n"
+            f"  Отменённых: <i>{count_cancelled_orders}</i>\n"
+            f"  Средний чек: <i>{round(avg_check, 2)}</i>\n"
+            f"  Сумма доставки для клиента: <i>{delivery_sum}</i>\n"
+            f"  Сумма по всем заказам: <b>{summ}</b>\n"
+            f"<i>------------------------------------------</i>\n"
+            f"  <b>Доставка:</b>\n"
+            f"  Среднее время ожидания: <i>{waiting_report_data.get("Доставка").get('average_time')}</i>\n"
+            f"  Максимальное время ожидания: <i>{waiting_report_data.get("Доставка").get('max_time')}</i>\n"
+            f"    В периоды: <i>\n    {delivery_periods_strings}</i>\n\n"
+            f"<i>------------------------------------------</i>\n"
+            f"  <b>Самовывоз:</b>\n"
+            f"  Среднее время ожидания: <i>{waiting_report_data.get("Самовывоз").get('average_time')}</i>\n"
+            f"  Максимальное время ожидания: <i>{waiting_report_data.get("Самовывоз").get('max_time')}</i>\n"
+            f"    В периоды: <i>\n    {pickup_periods_strings}</i>\n"
+            f"<b>──────────────────────────────────────────</b>\n"
+        )
+        logger.info(f"Сообщение построено\n{message}")
+        logger.info("Отправка сообщения")
+        messages.append(message)
+
+    if len(df) == 0:
+        message = (
+            f"За выбранный период данных нет."
+        )
+        logger.info(f"Сообщение построено\n{message}")
+        logger.info("Отправка сообщения")
+        messages.append(message)
+
+    # Отправка сообщений
+    for chat in chats:  # В каждый зарегистрированный чат
+        for message in messages:  # Каждое сообщение
+            await bot.send_message(chat.id, message, parse_mode=ParseMode.HTML)
