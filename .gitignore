@@ -1,6 +1,9 @@
 .venv
 .env
+test.env
 .idea
+result*
+postgres-data
 
 */__pycache__/*
 **/__pycache__/
