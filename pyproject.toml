@@ -6,7 +6,7 @@ authors = ["Garik <khvatik.igor@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.13"
 requests = "^2.32.3"
 python-dotenv = "^1.0.1"
 pydantic-settings = "^2.6.0"
@@ -20,7 +20,7 @@ alembic = "^1.14.0"
 asyncpg = "^0.30.0"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
-
+iiko-api = { git = "https://github.com/KhvatikG/iiko-api.git" }
 
 [build-system]
 requires = ["poetry-core"]
