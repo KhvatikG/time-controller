@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int
 
+    # UUID преднастроенного отчета в iiko, пример:
+    # {'data': [{'Department': '"Круг"', 'DishAmountInt': 20, 'DishType': 'DISH', 'HourOpen': '10'}, {'Department':...]}
+    DISH_PER_HOUR_OLAP_UUID: str
+
     @property
     def DB_URI(self) -> str:
         return (
@@ -85,11 +89,18 @@ class Settings(BaseSettings):
         GONZO: 45622
     }
 
-    # Сопоставление id организации с названием заведения
+    # Сопоставление id организации с названием заведения в смартомато
     NAME_TO_ORGANIZATION_ID: dict = {
         "КРУГ": 44166,
         "КУЛЬТ ЕДЫ": 45128,
         "GONZO": 45622
+    }
+
+    # Сопоставление Смартомато id организации с названием заведения в iiko
+    ORGANIZATION_ID_TO_IIKO_NAME: dict = {
+        44166: '"Круг"',
+        45128: 'Культ Еды',
+        45622: '«GONZO Азов»'
     }
 
     ORDERS_CLOSER_API_URL: str
