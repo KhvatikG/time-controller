@@ -5,7 +5,6 @@ from aiogram import html
 
 from loguru import logger
 
-from db.models.change_time_log import ForOrderType
 from models.zone import ZonesList, Zone
 from tomato.core.api.zones import get_all_zones_of_organization, update_zone
 from tomato.core.settings import SETTINGS
@@ -53,12 +52,13 @@ async def set_waiting_time(
 
                 # Отправляем обновление зоны на сервер
                 update_zone(zone=delivery_zone, token=token)
-                # Добавляем строку в журнал в бд
-                await fix_change_to_db_log(
-                    organization_id,
-                    waiting_time,
-                    ForOrderType("Доставка")
-                )
+
+
+            await fix_change_to_db_log(
+                organization_id,
+                waiting_time,
+                "Доставка"
+            )
 
         else:  # Если нужно установить время для самовывоза
             self_delivery_zone: Zone = zones.get_self_delivery_zone()
@@ -73,7 +73,7 @@ async def set_waiting_time(
             await fix_change_to_db_log(
                 organization_id,
                 waiting_time,
-                ForOrderType("Самовывоз")
+                "Самовывоз"
             )
 
     except Exception as e:
