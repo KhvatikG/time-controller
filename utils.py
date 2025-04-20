@@ -1,18 +1,18 @@
 from db.session import get_session
-from db.models.change_time_log import ChangeTimeLog, ForOrderType
+from db.models.change_time_log import ChangeTimeLog
 from tomato.core.settings import SETTINGS
 
 
-async def fix_change_to_db_log(department_id, new_time_minutes, for_type_order):
+async def fix_change_to_db_log(department_id, new_time_minutes, order_type):
     """
     Сохраняет в БД время изменения для отдела с id=department_id на new_time
     :param department_id: ID отдела на котором изменили время ожидания
     :param new_time_minutes: Время на которое изменили время ожидания
-    :param for_type_order: Время для доставки или самовывоза
+    :param order_type: Тип заказа для которого изменили время
     """
     async with get_session() as session:
         change = ChangeTimeLog(department_id=str(department_id), time_minutes=new_time_minutes,
-                               type_order=for_type_order)
+                               type_order=order_type)
         session.add(change)
         await session.commit()
 
