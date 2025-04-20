@@ -3,7 +3,7 @@ from typing import Dict, List
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models.change_time_log import ForOrderType, ChangeTimeLog
+from db.models.change_time_log import ChangeTimeLog
 
 
 def process_logs(logs: List, start_date: datetime) -> Dict:
@@ -104,8 +104,8 @@ async def get_daily_time_report(
     logs = result.scalars().all()
 
     # Разделяем логи по типам заказов
-    delivery_logs = [log for log in logs if log.type_order == ForOrderType.DELIVERY]
-    self_logs = [log for log in logs if log.type_order == ForOrderType.SELF]
+    delivery_logs = [log for log in logs if log.type_order == "Доставка"]
+    self_logs = [log for log in logs if log.type_order == "Самовывоз"]
 
     # Обрабатываем данные
     delivery_data = process_logs(delivery_logs, start_date)
@@ -113,12 +113,12 @@ async def get_daily_time_report(
 
     # Формируем итоговую структуру
     return {
-        ForOrderType.DELIVERY.value: {
+        "Доставка": {
             'max_time': delivery_data['max_time'],
             'max_periods': delivery_data['max_periods'],
             'average_time': delivery_data['average_time']
         },
-        ForOrderType.SELF.value: {
+        "Самовывоз": {
             'max_time': self_data['max_time'],
             'max_periods': self_data['max_periods'],
             'average_time': self_data['average_time']
