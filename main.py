@@ -1,5 +1,6 @@
 # TODO: Вынести сервисы в модуль services, и обдумать архитектуру
 import asyncio
+from html import escape
 
 from aiogram import Dispatcher, html, BaseMiddleware
 from aiogram.filters import CommandStart, Filter
@@ -88,7 +89,7 @@ async def echo_handler(message: Message) -> None:
             return
 
     except Exception as e:
-        error_message = f"Что-то пошло не так! Ошибка: \n❗{html.bold("ОШИБКА:")}❗\n {e}"
+        error_message = f"Что-то пошло не так! Ошибка: \n❗{html.bold("ОШИБКА:")}❗\n {escape(str(e))}"
         await message.answer(error_message)
         logger.exception(error_message)
         return
@@ -102,7 +103,7 @@ async def echo_handler(message: Message) -> None:
     except Exception as e:
         logger.exception(e)
         await message.answer(f"Что-то пошло не так...\n"
-                             f"❗{html.bold("ОШИБКА:")}❗\n {e}")
+                             f"❗{html.bold("ОШИБКА:")}❗\n {escape(str(e))}")
 
 
 async def main() -> None:

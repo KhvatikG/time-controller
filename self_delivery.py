@@ -1,3 +1,5 @@
+from html import escape
+
 from aiogram import Router, F, types, html
 from loguru import logger
 
@@ -65,4 +67,4 @@ async def self_delivery(message: types.Message):
         except Exception as e:
             logger.exception(e)
             await message.answer(f"Что-то пошло не так...\n"
-                                 f"❗{html.bold("ОШИБКА:")}❗\n {e}")
+                                 f"❗{"ОШИБКА:"}❗\n {escape(str(e))}")
