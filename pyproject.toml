@@ -21,6 +21,10 @@ asyncpg = "^0.30.0"
 pandas = "^2.2.3"
 openpyxl = "^3.1.5"
 iiko-api = { git = "https://github.com/KhvatikG/iiko-api.git" }
+plotly = "5.24.1"
+psycopg2-binary = "^2.9.10"
+imageio = "^2.37.0"
+kaleido = {version = "0.2.1", platform = "linux"}  # Для Docker
 
 [build-system]
 requires = ["poetry-core"]
