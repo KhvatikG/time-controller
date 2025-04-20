@@ -1,10 +1,14 @@
+import io
 from datetime import datetime
 
 from aiogram.enums import ParseMode
+from aiogram.types import InputFile
 
 from bot_init import bot
 from db.models.order_closer_chat import OrderCloserChat
 from db.session import get_session
+from init_iiko import iiko
+from reports.dish_per_time_report import generate_report
 from reports.waiting_report import get_daily_time_report
 from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
@@ -65,8 +69,9 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
             pickup_periods_strings = ["нет данных"]
 
         message = (
+            f"<b>────────────────────────</b>\n"
             f"Ресторан: <b>{department}</b>\n"
-            f"<b>──────────────────────────────────────────</b>\n"
+            f"<b>────────────────────────</b>\n"
             f"  Количество заказов: <i>{count_orders}</i>\n"
             f"  Отменённых: <i>{count_cancelled_orders}</i>\n"
             f"  Средний чек: <i>{round(avg_check, 2)}</i>\n"
@@ -82,16 +87,24 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
             f"  Среднее время ожидания: <i>{waiting_report_data.get("Самовывоз").get('average_time')}</i>\n"
             f"  Максимальное время ожидания: <i>{waiting_report_data.get("Самовывоз").get('max_time')}</i>\n"
             f"    В периоды: <i>\n    {pickup_periods_strings}</i>\n"
-            f"<b>──────────────────────────────────────────</b>\n"
+            f"<i>------------------------------------------</i>\n"
         )
         logger.info(f"Сообщение построено\n{message}")
         logger.info("Отправка сообщения")
-        messages.append(message)
+
+        iiko_api_data = iiko.olap.get_olap_by_preset_id(SETTINGS.DISH_PER_HOUR_OLAP_UUID)
+        animation = await generate_report(
+            department_name=department,
+            api_data=iiko_api_data,
+            department_id=int(department_id)
+        )
+
+        messages.append({"message": message, "animation": animation})
 
     if len(df) == 0:
-        message = (
-            f"За выбранный период данных нет."
-        )
+        message = {
+            "message": f"За выбранный период данных нет."
+        }
         logger.info(f"Сообщение построено\n{message}")
         logger.info("Отправка сообщения")
         messages.append(message)
@@ -99,4 +112,15 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
     # Отправка сообщений
     for chat in chats:  # В каждый зарегистрированный чат
         for message in messages:  # Каждое сообщение
-            await bot.send_message(chat.id, message, parse_mode=ParseMode.HTML)
+            if animation := message.get("animation"):
+                text_message = message.get("message") or "-"
+                await bot.send_message(chat_id=chat.id, text=text_message, parse_mode=ParseMode.HTML)
+                await bot.send_video(
+                    chat_id=chat.id,
+                    video=animation,
+                    width=1920,
+                    height=1080
+                )
+            else:
+                text_message = message.get("message") or "-"
+                await bot.send_message(chat_id=chat.id, text=text_message, parse_mode=ParseMode.HTML)

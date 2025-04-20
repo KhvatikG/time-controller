@@ -53,7 +53,6 @@ async def set_waiting_time(
                 # Отправляем обновление зоны на сервер
                 update_zone(zone=delivery_zone, token=token)
 
-
             await fix_change_to_db_log(
                 organization_id,
                 waiting_time,

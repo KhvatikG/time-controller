@@ -2,18 +2,21 @@ from dotenv import load_dotenv
 
 from pydantic_settings import BaseSettings
 
-
 load_dotenv()  # Загружаем переменные среды из .env
 
 
 class Settings(BaseSettings):
-
     MAIN_CHAT_ID: int = -1002351370021
 
     BOT_TOKEN: str
 
     TOMATO_LOGIN: str
     TOMATO_PASSWORD: str
+
+    # Iiko
+    IIKO_LOGIN: str
+    IIKO_HASH_PASSWORD: str
+    IIKO_BASE_URL: str
 
     # Postgres
     POSTGRES_USER: str

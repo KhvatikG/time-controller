@@ -1,6 +1,8 @@
 from db.session import get_session
 from db.models.change_time_log import ChangeTimeLog
 from tomato.core.settings import SETTINGS
+from sqlalchemy import select
+import pandas as pd
 
 
 async def fix_change_to_db_log(department_id, new_time_minutes, order_type):
@@ -26,3 +28,19 @@ def get_organization_id_per_name(organization_name: str) -> int:
         return organization_id
     else:
         raise KeyError(f'Не могу найти id организации по названию {organization_name}')
+
+
+def pandas_time_log_query(session):
+    conn = session.connection()
+    query = select(ChangeTimeLog)
+
+    return pd.read_sql(query, conn, index_col='id')
+
+
+async def get_change_time_log_df():
+    """Получение лога изменения времени на сервере в Pandas DataFrame"""
+
+    async with get_session() as session:
+        df = await session.run_sync(pandas_time_log_query)
+
+    return df
