@@ -73,6 +73,7 @@ async def delete_chat(message: Message) -> None:
         async with get_session() as session:
             result = await session.execute(select(OrderCloserChat).where(OrderCloserChat.id == message.chat.id))
             chat = result.scalar_one_or_none()
+            logger.info(f'Найден чат: {chat}')
             if not chat:
                 logger.info(f"Чат с таким id не зарегистрирован")
                 await message.answer(f'Чат с таким id не зарегистрирован')
@@ -80,7 +81,7 @@ async def delete_chat(message: Message) -> None:
 
             logger.info(f'Удаляем чат из БД')
 
-            session.delete(chat)
+            await session.delete(chat)
             await session.commit()
             await message.answer(f'Чат успешно удален')
             logger.info(f'Чат успешно удален')
