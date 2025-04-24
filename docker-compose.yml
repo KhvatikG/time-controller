@@ -4,6 +4,8 @@ services:
       context: .
     env_file:
       - test.env
+    volumes:
+      - ./reports:/app/reports
     ports:
       - "8080:8080"
     command: poetry run python main.py
@@ -12,6 +14,9 @@ services:
     image: postgres:17.4
     env_file:
       - test.env
+    environment:
+      TZ: Europe/Moscow      # Часовой пояс контейнера
+      PGTZ: Europe/Moscow    # Часовой пояс PostgreSQL
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
