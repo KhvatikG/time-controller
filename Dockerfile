@@ -1,5 +1,5 @@
 
-FROM python:3.13
+FROM python:3.13-slim
 
 LABEL authors="Игорь"
 
@@ -8,15 +8,13 @@ WORKDIR /app
 
 # Установка необходимых системных зависимостей и poetry
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
-        libgl1 \
         libgl1-mesa-glx \
         libegl1 \
         libxrender1 \
         libxkbcommon-x11-0 \
-        ffmpeg \
-        libx264-dev \
-        libnuma1 &&\
+        ffmpeg &&\
         rm -rf /var/lib/apt/lists/*
+
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
