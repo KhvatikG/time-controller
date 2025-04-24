@@ -147,6 +147,21 @@ def prepare_data(db_data_df: pd.DataFrame, api_data: dict, department_id: int, d
         (merged_df['hour'] <= 22)
         ]
 
+    # Заполнение пропущенных значений
+    previous_deliv_value = settings.SETTINGS.DEFAULT_ZONES_TIMES["AZOV_ALL_ORGANIZATIONS"]
+    previous_self_value = settings.SETTINGS.DEFAULT_ZONES_TIMES["SELF-DELIVERY_ALL_ORGANIZATIONS"]
+
+    for row_num in range(len(merged_df)):
+        row = merged_df.iloc[row_num]
+        if row["Доставка"] != 0:
+            previous_deliv_value = row["Доставка"]
+        else:
+            merged_df.iat[row_num, 1] = previous_deliv_value
+        if row["Самовывоз"] != 0:
+            previous_self_value = row["Самовывоз"]
+        else:
+            merged_df.iat[row_num, 2] = previous_self_value
+
     return merged_df.sort_values('hour')
 
 
