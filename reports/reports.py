@@ -68,24 +68,32 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
             pickup_periods_strings = ["нет данных"]
 
         iiko_count_orders_api_data = iiko.olap.get_olap_by_preset_id(SETTINGS.COUNT_ORDERS_OLAP_UUID)
-        department_iiko_name = settings.SETTINGS.ORGANIZATION_ID_TO_IIKO_NAME.get(department_id)
+        department_iiko_name = settings.SETTINGS.ORGANIZATION_ID_TO_IIKO_NAME.get(int(department_id))
 
         iiko_orders_count = 0
         try:
             if orders_data := iiko_count_orders_api_data.get('data'):
+                logger.info(f"Получение данных о количестве заказов в Iiko")
+                logger.info(f"Данные по количеству заказов в Iiko: {orders_data}")
                 for orders_data_item in orders_data:
+                    logger.info(f"Данные: {orders_data_item}")
                     if orders_data_item.get('Department') == department_iiko_name:
                         iiko_orders_count = orders_data_item.get('UniqOrderId.OrdersCount')
+                        logger.info(f"Количество заказов в Iiko для организации {department_iiko_name}: {iiko_orders_count}")
+                    else:
+                        logger.warning(f"Нет данных по количеству заказов в Iiko для организации {department_iiko_name}")
+            else:
+                logger.warning(f"Нет данных по количеству заказов в Iiko")
+                logger.warning(f"Отчет по количеству заказов в Iiko: {iiko_count_orders_api_data}")
         except Exception as e:
             logger.exception(f"Ошибка при получении данных о количестве заказов в Iiko")
-            iiko_orders_count = 0
 
         message = (
-            f"<b>────────────────────────</b>\n"
+            f"<b>────────────────────</b>\n"
             f"Ресторан: <b>{department}</b>\n"
-            f"<b>────────────────────────</b>\n"
+            f"<b>────────────────────</b>\n"
             f"  Количество заказов через томат: <i>{count_orders} из {iiko_orders_count}</i>\n"
-            f"  Это: <i>{count_orders/iiko_orders_count*100:.2}% от общего количества</i>\n"
+            f"  Это: <i>{round(count_orders/iiko_orders_count*100) if iiko_orders_count else '-'}% от общего количества</i>\n"
             f"  Отменённых: <i>{count_cancelled_orders}</i>\n"
             f"  Средний чек: <i>{round(avg_check, 2)}</i>\n"
             f"  Сумма доставки для клиента: <i>{delivery_sum}</i>\n"
