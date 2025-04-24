@@ -3,11 +3,12 @@ from datetime import datetime
 
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
-from sqlalchemy import String, Enum, BigInteger, func
+from sqlalchemy import String, BigInteger, func, DateTime
 
 from .base import Base
 
 ORDER_TYPE = Literal["Самовывоз", "Доставка"]
+
 
 class ChangeTimeLog(Base):
     __tablename__ = 'change_time_log'
@@ -16,7 +17,10 @@ class ChangeTimeLog(Base):
     type_order: Mapped[ORDER_TYPE]
     department_id: Mapped[str] = mapped_column(String(16))
     time_minutes: Mapped[int] = mapped_column()
-    created_at: Mapped[datetime] = mapped_column(default=func.now(), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
 
     def __repr__(self):
         return (f"ChangeTimeLog(id={self.id}, type_order={self.type_order},"
