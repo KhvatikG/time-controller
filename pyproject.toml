@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "timecontroller"
-version = "3.10.1"
+version = "3.11.0"
 description = "Проект контроля времени доставки через удобные и простые интерфейсы"
 authors = ["Garik <khvatik.igor@gmail.com>"]
 readme = "README.md"
