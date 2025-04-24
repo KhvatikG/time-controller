@@ -1,8 +1,6 @@
-import io
 from datetime import datetime
 
 from aiogram.enums import ParseMode
-from aiogram.types import InputFile
 
 from bot_init import bot
 from db.models.order_closer_chat import OrderCloserChat
@@ -10,6 +8,7 @@ from db.session import get_session
 from init_iiko import iiko
 from reports.dish_per_time_report import generate_report
 from reports.waiting_report import get_daily_time_report
+from tomato.core import settings
 from tomato.core.api.auth import get_tomato_auth_token
 from tomato.core.settings import SETTINGS
 from tomato.report import get_order_report_by_departments
@@ -68,11 +67,25 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
         else:
             pickup_periods_strings = ["нет данных"]
 
+        iiko_count_orders_api_data = iiko.olap.get_olap_by_preset_id(SETTINGS.COUNT_ORDERS_OLAP_UUID)
+        department_iiko_name = settings.SETTINGS.ORGANIZATION_ID_TO_IIKO_NAME.get(department_id)
+
+        iiko_orders_count = 0
+        try:
+            if orders_data := iiko_count_orders_api_data.get('data'):
+                for orders_data_item in orders_data:
+                    if orders_data_item.get('Department') == department_iiko_name:
+                        iiko_orders_count = orders_data_item.get('UniqOrderId.OrdersCount')
+        except Exception as e:
+            logger.exception(f"Ошибка при получении данных о количестве заказов в Iiko")
+            iiko_orders_count = 0
+
         message = (
             f"<b>────────────────────────</b>\n"
             f"Ресторан: <b>{department}</b>\n"
             f"<b>────────────────────────</b>\n"
-            f"  Количество заказов: <i>{count_orders}</i>\n"
+            f"  Количество заказов через томат: <i>{count_orders} из {iiko_orders_count}</i>\n"
+            f"  Это: <i>{count_orders/iiko_orders_count*100:.2}% от общего количества</i>\n"
             f"  Отменённых: <i>{count_cancelled_orders}</i>\n"
             f"  Средний чек: <i>{round(avg_check, 2)}</i>\n"
             f"  Сумма доставки для клиента: <i>{delivery_sum}</i>\n"

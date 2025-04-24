@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # {'data': [{'Department': '"Круг"', 'DishAmountInt': 20, 'DishType': 'DISH', 'HourOpen': '10'}, {'Department':...]}
     DISH_PER_HOUR_OLAP_UUID: str
 
+    # UUID преднастроенного отчета с количеством заказов в iiko
+    COUNT_ORDERS_OLAP_UUID: str
+
     @property
     def DB_URI(self) -> str:
         return (
