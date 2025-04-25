@@ -107,7 +107,7 @@ async def get_daily_time_report(
 
     result = await session.execute(stmt)
     logs = result.scalars().all()
-    logger.debug("Получены логи: %s", logs)
+    logger.debug(f"Получены логи: {logs}")
 
     # Разделяем логи по типам заказов
     delivery_logs = [log for log in logs if log.type_order == "Доставка"]
