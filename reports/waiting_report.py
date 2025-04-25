@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Dict, List
+from zoneinfo import ZoneInfo
+
+from loguru import logger
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +11,9 @@ from db.models.change_time_log import ChangeTimeLog
 
 def process_logs(logs: List, start_date: datetime) -> Dict:
     """Обрабатывает логи для одного типа заказа и вычисляет метрики."""
+
+    msk_tz = ZoneInfo('Europe/Moscow')
+
     if not logs:
         return {
             'max_time': None,
@@ -23,8 +29,8 @@ def process_logs(logs: List, start_date: datetime) -> Dict:
         current = logs[i]
         next_created = logs[i + 1].created_at if i < len(logs) - 1 else end_of_day
         intervals.append({
-            'start': current.created_at,
-            'end': next_created,
+            'start': current.created_at.astimezone(msk_tz),
+            'end': next_created.astimezone(msk_tz),
             'time': current.time_minutes
         })
 
@@ -84,8 +90,14 @@ async def get_daily_time_report(
             }
         }
     """
-    start_date = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    msk_tz = ZoneInfo("Europe/Moscow")
+
+    start_date = target_date.replace(tzinfo=msk_tz, hour=0, minute=0, second=0, microsecond=0)
+
     end_date = start_date + timedelta(days=1)
+
+    logger.debug(f"==========Получаем данные для отчета по времени доставки и самовывоза за {target_date}=============")
+    logger.debug(f"Начало дня: {start_date}, конец дня: {end_date}")
 
     # Получаем логи за день
     stmt = (
@@ -102,6 +114,8 @@ async def get_daily_time_report(
 
     result = await session.execute(stmt)
     logs = result.scalars().all()
+    logger.debug(f"Получены логи: {logs}")
+    logger.debug(f"==============================")
 
     # Разделяем логи по типам заказов
     delivery_logs = [log for log in logs if log.type_order == "Доставка"]
