@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 
 import pytz
+from loguru import logger
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -106,6 +107,7 @@ async def get_daily_time_report(
 
     result = await session.execute(stmt)
     logs = result.scalars().all()
+    logger.debug("Получены логи: %s", logs)
 
     # Разделяем логи по типам заказов
     delivery_logs = [log for log in logs if log.type_order == "Доставка"]
