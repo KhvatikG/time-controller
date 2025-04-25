@@ -12,6 +12,9 @@ from db.models.change_time_log import ChangeTimeLog
 
 def process_logs(logs: List, start_date: datetime) -> Dict:
     """Обрабатывает логи для одного типа заказа и вычисляет метрики."""
+
+    tz = ZoneInfo('Europe/Moscow')
+
     if not logs:
         return {
             'max_time': None,
@@ -27,8 +30,8 @@ def process_logs(logs: List, start_date: datetime) -> Dict:
         current = logs[i]
         next_created = logs[i + 1].created_at if i < len(logs) - 1 else end_of_day
         intervals.append({
-            'start': current.created_at,
-            'end': next_created,
+            'start': current.created_at.astimezone(tz),
+            'end': next_created.astimezone(tz),
             'time': current.time_minutes
         })
 
