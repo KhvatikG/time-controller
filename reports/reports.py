@@ -70,8 +70,8 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
 
         iiko_count_orders_api_data = iiko.olap.get_olap_by_preset_id(
             preset_id=SETTINGS.COUNT_ORDERS_OLAP_UUID,
-            date_from=date,
-            date_to=next_day.strftime("%Y-%m-%d"),
+            date_from=datetime.fromisoformat(date),
+            date_to=next_day,
         )
         department_iiko_name = settings.SETTINGS.ORGANIZATION_ID_TO_IIKO_NAME.get(int(department_id))
 
@@ -120,8 +120,8 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
 
         iiko_api_data = iiko.olap.get_olap_by_preset_id(
             preset_id=SETTINGS.DISH_PER_HOUR_OLAP_UUID,
-            date_from=date,
-            date_to=next_day.strftime("%Y-%m-%d"),
+            date_from=datetime.fromisoformat(date),
+            date_to=next_day,
         )
         animation = await generate_report(
             department_name=department,
