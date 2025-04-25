@@ -91,6 +91,8 @@ async def get_daily_time_report(
     """
     start_date = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
     end_date = start_date + timedelta(days=1)
+    logger.debug(f"==========Получаем данные для отчета по времени доставки и самовывоза за {target_date}=============")
+    logger.debug(f"Начало дня: {start_date}, конец дня: {end_date}")
 
     # Получаем логи за день
     stmt = (
