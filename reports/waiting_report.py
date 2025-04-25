@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Dict, List
+from zoneinfo import ZoneInfo
 
 import pytz
 from loguru import logger
@@ -17,6 +18,8 @@ def process_logs(logs: List, start_date: datetime) -> Dict:
             'max_periods': [],
             'average_time': None
         }
+    tz_msk = pytz.timezone('Europe/Moscow')
+    start_date = tz_msk.localize(start_date)
 
     end_of_day = start_date + timedelta(days=1) - timedelta(microseconds=1)
     intervals = []
@@ -87,8 +90,13 @@ async def get_daily_time_report(
             }
         }
     """
+    msk_tz = ZoneInfo("Europe/Moscow")
+
     start_date = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    start_date = start_date.replace(tzinfo=msk_tz, hour=0, minute=0, second=0, microsecond=0)
+
     end_date = start_date + timedelta(days=1)
+
     logger.debug(f"==========Получаем данные для отчета по времени доставки и самовывоза за {target_date}=============")
     logger.debug(f"Начало дня: {start_date}, конец дня: {end_date}")
 
