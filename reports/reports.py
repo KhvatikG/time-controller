@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram.enums import ParseMode
 
@@ -25,7 +25,7 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
     """
     if date == "now":
         date = datetime.now().strftime("%Y-%m-%d")
-    next_day = datetime.strptime(date, "%Y-%m-%d") + datetime.timedelta(days=1)
+    next_day = datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)
 
     logger.info("Отправка дневного отчета по отделам")
     logger.debug("Получение токена")
