@@ -25,6 +25,7 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
     """
     if date == "now":
         date = datetime.now().strftime("%Y-%m-%d")
+    next_day = datetime.strptime(date, "%Y-%m-%d") + datetime.timedelta(days=1)
 
     logger.info("Отправка дневного отчета по отделам")
     logger.debug("Получение токена")
@@ -67,7 +68,11 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
         else:
             pickup_periods_strings = ["нет данных"]
 
-        iiko_count_orders_api_data = iiko.olap.get_olap_by_preset_id(SETTINGS.COUNT_ORDERS_OLAP_UUID)
+        iiko_count_orders_api_data = iiko.olap.get_olap_by_preset_id(
+            preset_id=SETTINGS.COUNT_ORDERS_OLAP_UUID,
+            date_from=date,
+            date_to=next_day.strftime("%Y-%m-%d"),
+        )
         department_iiko_name = settings.SETTINGS.ORGANIZATION_ID_TO_IIKO_NAME.get(int(department_id))
 
         iiko_orders_count = 0
@@ -113,7 +118,11 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
         logger.info(f"Сообщение построено\n{message}")
         logger.info("Отправка сообщения")
 
-        iiko_api_data = iiko.olap.get_olap_by_preset_id(SETTINGS.DISH_PER_HOUR_OLAP_UUID)
+        iiko_api_data = iiko.olap.get_olap_by_preset_id(
+            preset_id=SETTINGS.DISH_PER_HOUR_OLAP_UUID,
+            date_from=date,
+            date_to=next_day.strftime("%Y-%m-%d"),
+        )
         animation = await generate_report(
             department_name=department,
             api_data=iiko_api_data,
