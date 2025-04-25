@@ -109,6 +109,7 @@ async def get_daily_time_report(
         )
         .order_by(ChangeTimeLog.created_at)
     )
+    logger.debug(f"Сформирован запрос: {str(stmt)}")
 
     result = await session.execute(stmt)
     logs = result.scalars().all()
