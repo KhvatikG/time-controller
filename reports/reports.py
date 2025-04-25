@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytz
 from aiogram.enums import ParseMode
 
 from bot_init import bot
@@ -23,8 +24,27 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
     :param chats: Чаты для отправки отчета
     :param date: дата в формате YYYY-MM-DD по умолчанию None - будет использована сегодняшняя дата
     """
+    msk_tz = pytz.timezone("Europe/Moscow")
+
     if date == "now":
-        date = datetime.now().strftime("%Y-%m-%d")
+        date = datetime.now(msk_tz).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+    else:
+
+        if date:
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d")
+            except ValueError:
+                logger.warning(f"Неверный формат даты {date}. Будет использована сегодняшняя дата")
+                date = datetime.now(msk_tz).replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                )
+        else:
+            logger.warning("Дата не задана. Будет использована сегодняшняя дата")
+            date = datetime.now(msk_tz).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
 
     logger.info("Отправка дневного отчета по отделам")
     logger.debug("Получение токена")
@@ -79,9 +99,11 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
                     logger.info(f"Данные: {orders_data_item}")
                     if orders_data_item.get('Department') == department_iiko_name:
                         iiko_orders_count = orders_data_item.get('UniqOrderId.OrdersCount')
-                        logger.info(f"Количество заказов в Iiko для организации {department_iiko_name}: {iiko_orders_count}")
+                        logger.info(
+                            f"Количество заказов в Iiko для организации {department_iiko_name}: {iiko_orders_count}")
                     else:
-                        logger.warning(f"Нет данных по количеству заказов в Iiko для организации {department_iiko_name}")
+                        logger.warning(
+                            f"Нет данных по количеству заказов в Iiko для организации {department_iiko_name}")
             else:
                 logger.warning(f"Нет данных по количеству заказов в Iiko")
                 logger.warning(f"Отчет по количеству заказов в Iiko: {iiko_count_orders_api_data}")
@@ -93,7 +115,7 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
             f"Ресторан: <b>{department}</b>\n"
             f"<b>────────────────────</b>\n"
             f"  Количество заказов через томат: <i>{count_orders} из {iiko_orders_count}</i>\n"
-            f"  Это: <i>{round(count_orders/iiko_orders_count*100) if iiko_orders_count else '-'}% от общего количества</i>\n"
+            f"  Это: <i>{round(count_orders / iiko_orders_count * 100) if iiko_orders_count else '-'}% от общего количества</i>\n"
             f"  Отменённых: <i>{count_cancelled_orders}</i>\n"
             f"  Средний чек: <i>{round(avg_check, 2)}</i>\n"
             f"  Сумма доставки для клиента: <i>{delivery_sum}</i>\n"
