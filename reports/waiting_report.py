@@ -17,8 +17,6 @@ def process_logs(logs: List, start_date: datetime) -> Dict:
             'max_periods': [],
             'average_time': None
         }
-    tz_msk = pytz.timezone('Europe/Moscow')
-    start_date = tz_msk.localize(start_date)
 
     end_of_day = start_date + timedelta(days=1) - timedelta(microseconds=1)
     intervals = []
