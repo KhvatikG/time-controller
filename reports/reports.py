@@ -94,9 +94,9 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
             logger.exception(f"Ошибка при получении данных о количестве заказов в Iiko")
 
         message = (
-            f"<b>────────────────────</b>\n"
+            f"<b>───────────────────</b>\n"
             f"Ресторан: <b>{department}</b>\n"
-            f"<b>────────────────────</b>\n"
+            f"<b>───────────────────</b>\n"
             f"  Количество заказов через томат: <i>{count_orders} из {iiko_orders_count}</i>\n"
             f"  Это: <i>{round(count_orders/iiko_orders_count*100) if iiko_orders_count else '-'}% от общего количества</i>\n"
             f"  Отменённых: <i>{count_cancelled_orders}</i>\n"
