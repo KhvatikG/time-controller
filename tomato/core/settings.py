@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # UUID преднастроенного отчета с количеством заказов в iiko
     COUNT_ORDERS_OLAP_UUID: str
 
+    # Часовой пояс
+    TIMEZONE: str = "Europe/Moscow"
+
     @property
     def DB_URI(self) -> str:
         return (

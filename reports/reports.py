@@ -126,7 +126,8 @@ async def send_departments_report(date: str = "now", chats: list[OrderCloserChat
         animation = await generate_report(
             department_name=department,
             api_data=iiko_api_data,
-            department_id=int(department_id)
+            department_id=int(department_id),
+            date_filter=date,
         )
 
         messages.append({"message": message, "animation": animation})

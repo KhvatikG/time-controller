@@ -91,6 +91,8 @@ def prepare_data(db_data_df: pd.DataFrame, api_data: dict, department_id: int, d
         raise ValueError(
             f"Неверный тип аргумента 'department_id': ожидается int, получен {type(department_id)}"
         )
+    logger.info("Подготовка данных для отдела: " + str(department_id) + " на дату: " + str(date_filter.date()))
+    logger.info(f"Датафрэйм: \n{db_data_df.head()}")
 
     # Фильтрация и преобразование данных заказов
     waiting_time_df = db_data_df
@@ -99,6 +101,8 @@ def prepare_data(db_data_df: pd.DataFrame, api_data: dict, department_id: int, d
         (waiting_time_df['department_id'] == str(department_id)) &
         (waiting_time_df['created_at'].dt.date == date_filter.date())
         ]
+
+    logger.info(f'Датафрэйм после фильтрации: \n{waiting_time_df}')
 
     # Фильтрация по времени работы заведения (10-22)
     waiting_time_df = waiting_time_df[
@@ -288,11 +292,12 @@ def create_combined_plot(data: pd.DataFrame, department_name: str):
     return fig
 
 
-async def generate_report(department_name: str, api_data: dict, department_id: int):
-    """Генерация и отправка отчета"""
+async def generate_report(department_name: str, api_data: dict, department_id: int, date_filter: str):
+    """Генерация отчета"""
+    date_filter = datetime.strptime(date_filter, '%Y-%m-%d')
     db_data_df = await get_change_time_log_df()
     # Подготовка данных
-    df = prepare_data(db_data_df, api_data, department_id, datetime.now())
+    df = prepare_data(db_data_df, api_data, department_id, date_filter)
 
     # Создание графика
     fig = create_combined_plot(df, department_name)
