@@ -1,7 +1,7 @@
 from db.session import get_session
 from db.models.change_time_log import ChangeTimeLog
 from tomato.core.settings import SETTINGS
-from sqlalchemy import select
+from sqlalchemy import text
 import pandas as pd
 
 
@@ -32,9 +32,17 @@ def get_organization_id_per_name(organization_name: str) -> int:
 
 def pandas_time_log_query(session):
     conn = session.connection()
-    query = select(ChangeTimeLog)
+    raw_sql = """
+    SELECT 
+        (created_at AT TIME ZONE 'Europe/Moscow')::timestamp AS created_at,
+        department_id,
+        time_minutes,
+        id,
+        type_order
+    FROM change_time_log
+    """
 
-    return pd.read_sql(query, conn, index_col='id')
+    return pd.read_sql(text(raw_sql), conn, index_col='id')
 
 
 async def get_change_time_log_df():
